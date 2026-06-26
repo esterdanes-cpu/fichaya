@@ -3,67 +3,79 @@ import { supabase } from './lib/supabase'
 
 const ADMIN_PIN = import.meta.env.VITE_ADMIN_PIN || '1234'
 const AUTO_HOURS = 8
-
+const LOGO = 'data:image/jpeg;base64,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'
 // ─── STYLES ────────────────────────────────────────────
 const css = `
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600&display=swap');
   :root {
-    --bg: #0f1117; --surface: #1a1d27; --card: #222536; --border: #2e3248;
-    --accent: #4f7cff; --green: #22c55e; --red: #ef4444; --amber: #f59e0b;
-    --text: #e8eaf0; --muted: #8b90a8;
+    --bg:      #3a3a3a;
+    --surface: #2e2e2e;
+    --card:    #343434;
+    --border:  #4a4a4a;
+    --accent:  #b5c9a0;
+    --green:   #7aad5a;
+    --red:     #d96b5a;
+    --amber:   #d4a85a;
+    --text:    #f0ede8;
+    --muted:   #9a9590;
+    --white:   #ffffff;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   body { background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; min-height: 100dvh; }
   #root { min-height: 100dvh; display: flex; flex-direction: column; }
 
-  .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; }
-  .logo { font-size: 1rem; font-weight: 700; letter-spacing: .04em; }
-  .logo span { color: var(--accent); }
-  .clock { font-size: .8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; }
+  .logo-wrap { display: flex; align-items: center; gap: 12px; }
+  .logo-img { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; }
+  .logo-text { line-height: 1.2; }
+  .logo-name { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 900; color: var(--white); letter-spacing: .04em; text-transform: uppercase; }
+  .logo-sub { font-size: .65rem; color: var(--accent); letter-spacing: .12em; text-transform: uppercase; font-weight: 500; }
+  .clock { font-size: .78rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 
-  .nav { background: var(--surface); border-bottom: 1px solid var(--border); display: flex; gap: 4px; padding: 8px 16px; }
-  .nav-btn { background: none; border: none; cursor: pointer; color: var(--muted); font-size: .82rem; font-weight: 500; padding: 6px 14px; border-radius: 6px; transition: all .15s; font-family: inherit; }
-  .nav-btn:hover, .nav-btn.active { background: var(--card); color: var(--text); }
-  .nav-btn.active { color: var(--accent); }
+  .nav { background: var(--surface); border-bottom: 1px solid var(--border); display: flex; gap: 2px; padding: 8px 16px; }
+  .nav-btn { background: none; border: none; cursor: pointer; color: var(--muted); font-size: .8rem; font-weight: 500; padding: 7px 16px; border-radius: 6px; transition: all .15s; font-family: inherit; border-bottom: 2px solid transparent; }
+  .nav-btn.active { background: var(--card); color: var(--accent); border-bottom: 2px solid var(--accent); }
+  .nav-btn:hover { background: var(--card); color: var(--text); }
 
   main { flex: 1; padding: 28px 20px; max-width: 900px; margin: 0 auto; width: 100%; }
 
   /* PIN */
-  .pin-wrap { max-width: 340px; margin: 0 auto; }
-  .pin-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 6px; }
-  .pin-sub { color: var(--muted); font-size: .85rem; margin-bottom: 28px; }
+  .pin-wrap { max-width: 320px; margin: 0 auto; }
+  .pin-header { text-align: center; margin-bottom: 28px; }
+  .pin-logo { width: 60px; height: 60px; border-radius: 12px; object-fit: cover; margin: 0 auto 14px; display: block; }
+  .pin-title { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; color: var(--white); margin-bottom: 4px; }
+  .pin-sub { color: var(--muted); font-size: .82rem; }
   .pin-dots { display: flex; gap: 14px; justify-content: center; margin-bottom: 28px; }
-  .pin-dot { width: 14px; height: 14px; border-radius: 50%; background: var(--border); transition: background .15s; }
+  .pin-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--border); transition: background .15s; }
   .pin-dot.filled { background: var(--accent); }
-  .pin-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
-  .pin-btn { background: var(--card); border: 1px solid var(--border); color: var(--text); font-size: 1.3rem; font-weight: 600; padding: 18px; border-radius: 12px; cursor: pointer; transition: all .1s; user-select: none; font-family: inherit; }
+  .pin-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+  .pin-btn { background: var(--card); border: 1px solid var(--border); color: var(--white); font-size: 1.3rem; font-weight: 600; padding: 18px; border-radius: 10px; cursor: pointer; transition: all .1s; user-select: none; font-family: inherit; }
   .pin-btn:active { transform: scale(.93); background: var(--border); }
-  .pin-btn.del { font-size: 1rem; color: var(--muted); }
-  .pin-btn.ok { background: var(--accent); border-color: var(--accent); color: #fff; }
-  .pin-msg { text-align: center; font-size: .85rem; min-height: 22px; margin-top: 4px; }
-  .pin-msg.ok { color: var(--green); }
+  .pin-btn.del { font-size: .95rem; color: var(--muted); }
+  .pin-btn.ok { background: var(--accent); border-color: var(--accent); color: var(--surface); font-weight: 700; }
+  .pin-msg { text-align: center; font-size: .82rem; min-height: 22px; margin-top: 4px; }
   .pin-msg.err { color: var(--red); }
 
   /* CONFIRM */
   .confirm-wrap { text-align: center; }
-  .avatar { width: 72px; height: 72px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 1.7rem; font-weight: 700; margin: 0 auto 16px; }
-  .confirm-name { font-size: 1.3rem; font-weight: 700; margin-bottom: 6px; }
-  .confirm-status { color: var(--muted); font-size: .85rem; margin-bottom: 28px; }
+  .avatar { width: 72px; height: 72px; border-radius: 50%; background: var(--accent); color: var(--surface); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; font-weight: 700; margin: 0 auto 16px; font-family: 'Playfair Display', serif; }
+  .confirm-name { font-family: 'Playfair Display', serif; font-size: 1.25rem; font-weight: 700; color: var(--white); margin-bottom: 6px; }
+  .confirm-status { color: var(--muted); font-size: .82rem; margin-bottom: 28px; }
   .confirm-btns { display: flex; gap: 10px; }
-  .btn-cancel { flex: 1; background: none; border: 1px solid var(--border); color: var(--muted); padding: 14px; border-radius: 12px; cursor: pointer; font-size: .9rem; font-family: inherit; }
-  .btn-action { flex: 2; border: none; color: #fff; padding: 14px; border-radius: 12px; cursor: pointer; font-size: .95rem; font-weight: 700; font-family: inherit; transition: opacity .15s; }
+  .btn-cancel { flex: 1; background: none; border: 1px solid var(--border); color: var(--muted); padding: 14px; border-radius: 10px; cursor: pointer; font-size: .88rem; font-family: inherit; }
+  .btn-action { flex: 2; border: none; padding: 14px; border-radius: 10px; cursor: pointer; font-size: .95rem; font-weight: 700; font-family: inherit; transition: opacity .15s; }
   .btn-action:disabled { opacity: .6; cursor: not-allowed; }
 
   /* HISTORY */
   .hist-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 20px; }
-  .sel { background: var(--card); border: 1px solid var(--border); color: var(--text); font-size: .82rem; padding: 8px 12px; border-radius: 8px; outline: none; cursor: pointer; font-family: inherit; }
-  .btn-export { margin-left: auto; background: var(--accent); border: none; color: #fff; font-size: .82rem; font-weight: 600; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-family: inherit; }
-  table { width: 100%; border-collapse: collapse; font-size: .82rem; }
-  thead th { text-align: left; color: var(--muted); font-weight: 500; font-size: .75rem; padding: 8px 10px; border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: .06em; }
+  .sel { background: var(--card); border: 1px solid var(--border); color: var(--text); font-size: .8rem; padding: 8px 12px; border-radius: 8px; outline: none; cursor: pointer; font-family: inherit; }
+  .btn-export { margin-left: auto; background: var(--accent); border: none; color: var(--surface); font-size: .8rem; font-weight: 700; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-family: inherit; }
+  table { width: 100%; border-collapse: collapse; font-size: .8rem; }
+  thead th { text-align: left; color: var(--accent); font-weight: 600; font-size: .72rem; padding: 8px 10px; border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: .08em; }
   tbody tr { border-bottom: 1px solid var(--border); }
   tbody tr:hover { background: var(--card); }
   tbody td { padding: 11px 10px; }
-  .auto-tag { font-size: .68rem; background: rgba(245,158,11,.15); color: var(--amber); padding: 2px 6px; border-radius: 4px; margin-left: 5px; }
+  .auto-tag { font-size: .67rem; background: rgba(212,168,90,.15); color: var(--amber); padding: 2px 6px; border-radius: 4px; margin-left: 4px; }
   .loc-link { color: var(--accent); font-size: .75rem; text-decoration: none; }
   .loc-acc { color: var(--muted); font-size: .7rem; margin-left: 3px; }
   .loc-denied { color: var(--amber); font-size: .73rem; }
@@ -71,38 +83,38 @@ const css = `
 
   /* ADMIN */
   .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
-  .stat { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
-  .stat-val { font-size: 1.5rem; font-weight: 700; }
-  .stat-lbl { font-size: .73rem; color: var(--muted); margin-top: 3px; }
+  .stat { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; border-top: 2px solid var(--accent); }
+  .stat-val { font-size: 1.6rem; font-weight: 700; color: var(--white); font-family: 'Playfair Display', serif; }
+  .stat-lbl { font-size: .72rem; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: .06em; }
   .admin-grid { display: grid; gap: 16px; grid-template-columns: 1fr 1fr; }
   @media(max-width:600px) { .admin-grid { grid-template-columns: 1fr; } }
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
-  .card-title { font-size: .78rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 16px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+  .card-title { font-size: .72rem; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 16px; }
   .input-row { display: flex; gap: 8px; margin-bottom: 10px; }
   .inp { flex: 1; background: var(--surface); border: 1px solid var(--border); color: var(--text); font-size: .85rem; padding: 9px 12px; border-radius: 8px; outline: none; font-family: inherit; }
   .inp:focus { border-color: var(--accent); }
-  .btn-sm { background: var(--accent); border: none; color: #fff; font-size: .8rem; font-weight: 600; padding: 9px 14px; border-radius: 8px; cursor: pointer; white-space: nowrap; font-family: inherit; }
-  .btn-sm.danger { background: var(--red); }
+  .btn-sm { background: var(--accent); border: none; color: var(--surface); font-size: .8rem; font-weight: 700; padding: 9px 14px; border-radius: 8px; cursor: pointer; white-space: nowrap; font-family: inherit; }
+  .btn-sm.danger { background: var(--red); color: #fff; }
   .worker-list { display: flex; flex-direction: column; gap: 8px; }
-  .worker-row { display: flex; align-items: center; justify-content: space-between; background: var(--surface); border: 1px solid var(--border); border-radius: 9px; padding: 10px 14px; font-size: .85rem; }
-  .worker-name { font-weight: 600; }
-  .worker-pin { font-size: .73rem; color: var(--muted); font-family: monospace; margin-top: 2px; }
-  .badge { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; border-radius: 20px; font-size: .72rem; font-weight: 600; background: rgba(34,197,94,.15); color: var(--green); margin-left: 8px; }
+  .worker-row { display: flex; align-items: center; justify-content: space-between; background: var(--surface); border: 1px solid var(--border); border-radius: 9px; padding: 10px 14px; font-size: .84rem; }
+  .worker-name { font-weight: 600; color: var(--white); }
+  .worker-pin { font-size: .72rem; color: var(--muted); font-family: monospace; margin-top: 2px; }
+  .badge { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; border-radius: 20px; font-size: .7rem; font-weight: 600; background: rgba(181,201,160,.15); color: var(--accent); margin-left: 8px; }
   .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-  .active-row { display: flex; align-items: center; justify-content: space-between; background: rgba(34,197,94,.06); border: 1px solid rgba(34,197,94,.2); border-radius: 9px; padding: 10px 14px; font-size: .85rem; margin-bottom: 8px; }
-  .active-since { font-size: .73rem; color: var(--muted); margin-top: 2px; }
-  .btn-force { background: none; border: 1px solid var(--red); color: var(--red); font-size: .73rem; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-family: inherit; }
+  .active-row { display: flex; align-items: center; justify-content: space-between; background: rgba(181,201,160,.07); border: 1px solid rgba(181,201,160,.25); border-radius: 9px; padding: 10px 14px; font-size: .84rem; margin-bottom: 8px; }
+  .active-since { font-size: .72rem; color: var(--muted); margin-top: 2px; }
+  .btn-force { background: none; border: 1px solid var(--red); color: var(--red); font-size: .72rem; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-family: inherit; }
 
   /* MODAL */
-  .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,.75); z-index: 100; display: flex; align-items: center; justify-content: center; }
-  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 28px 24px; width: 320px; max-width: 92vw; }
-  .modal-title { font-size: 1.05rem; font-weight: 700; margin-bottom: 6px; }
-  .modal-sub { color: var(--muted); font-size: .82rem; margin-bottom: 22px; }
-  .btn-modal-cancel { width: 100%; margin-top: 10px; background: none; border: 1px solid var(--border); color: var(--muted); padding: 10px; border-radius: 8px; cursor: pointer; font-size: .85rem; font-family: inherit; }
+  .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,.8); z-index: 100; display: flex; align-items: center; justify-content: center; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px 24px; width: 300px; max-width: 92vw; border-top: 3px solid var(--accent); }
+  .modal-title { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; color: var(--white); margin-bottom: 4px; }
+  .modal-sub { color: var(--muted); font-size: .8rem; margin-bottom: 20px; }
+  .btn-modal-cancel { width: 100%; margin-top: 10px; background: none; border: 1px solid var(--border); color: var(--muted); padding: 10px; border-radius: 8px; cursor: pointer; font-size: .82rem; font-family: inherit; }
 
   /* TOAST */
-  .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 22px; font-size: .85rem; white-space: nowrap; box-shadow: 0 8px 32px rgba(0,0,0,.4); z-index: 999; animation: fadeUp .2s ease; }
-  .toast.ok { border-color: var(--green); color: var(--green); }
+  .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 22px; font-size: .82rem; white-space: nowrap; box-shadow: 0 8px 32px rgba(0,0,0,.5); z-index: 999; animation: fadeUp .2s ease; }
+  .toast.ok { border-color: var(--accent); color: var(--accent); }
   .toast.err { border-color: var(--red); color: var(--red); }
   @keyframes fadeUp { from { opacity:0; transform: translateX(-50%) translateY(10px); } to { opacity:1; transform: translateX(-50%) translateY(0); } }
 
@@ -143,7 +155,6 @@ async function fetchWorkers() {
   const { data } = await supabase.from('workers').select('*').order('name')
   return data || []
 }
-
 async function fetchRecords() {
   const { data } = await supabase.from('records').select('*').order('check_in', { ascending: false })
   return data || []
@@ -160,13 +171,11 @@ export default function App() {
   const [showAdminModal, setShowAdminModal] = useState(false)
   const toastTimer = useRef(null)
 
-  // Clock
   useEffect(() => {
     const tick = () => setClock(new Date().toLocaleString('es-ES', { weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }))
     tick(); const t = setInterval(tick, 1000); return () => clearInterval(t)
   }, [])
 
-  // Load data
   const reload = useCallback(async () => {
     setLoading(true)
     const [w, r] = await Promise.all([fetchWorkers(), fetchRecords()])
@@ -176,7 +185,6 @@ export default function App() {
 
   useEffect(() => { reload() }, [reload])
 
-  // Auto-checkout check every minute
   useEffect(() => {
     const check = async () => {
       const now = new Date()
@@ -209,13 +217,19 @@ export default function App() {
     <>
       <style>{css}</style>
       <div className="header">
-        <div className="logo">Ficha<span>Ya</span></div>
+        <div className="logo-wrap">
+          <img className="logo-img" src={LOGO} alt="Estapé 1920" />
+          <div className="logo-text">
+            <div className="logo-name">Estapé 1920</div>
+            <div className="logo-sub">Control de Jornada</div>
+          </div>
+        </div>
         <div className="clock">{clock}</div>
       </div>
       <nav className="nav">
         <button className={`nav-btn ${view === 'pin' ? 'active' : ''}`} onClick={() => handleNav('pin')}>⏱ Fichar</button>
         <button className={`nav-btn ${view === 'history' ? 'active' : ''}`} onClick={() => handleNav('history')}>📋 Historial</button>
-        <button className={`nav-btn ${view === 'admin' ? 'active' : ''}`} onClick={() => handleNav('admin')}>⚙️ Administrar</button>
+        <button className={`nav-btn ${view === 'admin' ? 'active' : ''}`} onClick={() => handleNav('admin')}>⚙️ Admin</button>
       </nav>
       <main>
         {loading ? <div className="loading"><div className="spinner" /> Cargando...</div> : <>
@@ -224,14 +238,12 @@ export default function App() {
           {view === 'admin' && <AdminView workers={workers} records={records} reload={reload} showToast={showToast} />}
         </>}
       </main>
-
       {showAdminModal && (
         <AdminPinModal
           onSuccess={() => { setShowAdminModal(false); setView('admin') }}
           onClose={() => setShowAdminModal(false)}
         />
       )}
-
       {toast && <div className={`toast ${toast.type}`}>{toast.msg}</div>}
     </>
   )
@@ -241,7 +253,7 @@ export default function App() {
 function PinView({ workers, records, reload, showToast }) {
   const [buf, setBuf] = useState('')
   const [msg, setMsg] = useState({ text: '', type: '' })
-  const [pending, setPending] = useState(null) // worker identificado
+  const [pending, setPending] = useState(null)
   const [working, setWorking] = useState(false)
 
   function press(d) {
@@ -255,10 +267,8 @@ function PinView({ workers, records, reload, showToast }) {
   function del() { setBuf(b => b.slice(0, -1)); setMsg({ text: '', type: '' }) }
 
   function submit(pin) {
-    // Admin PIN
     if (pin === ADMIN_PIN) {
       setBuf('')
-      // Dispatch nav to admin via custom event - simple approach
       window.dispatchEvent(new CustomEvent('goto-admin'))
       return
     }
@@ -289,9 +299,8 @@ function PinView({ workers, records, reload, showToast }) {
     setPending(null)
   }
 
-  // Listen for goto-admin from PIN
   useEffect(() => {
-    const h = () => { /* handled in App */ }
+    const h = () => {}
     window.addEventListener('goto-admin', h)
     return () => window.removeEventListener('goto-admin', h)
   }, [])
@@ -300,11 +309,9 @@ function PinView({ workers, records, reload, showToast }) {
     const open = records.find(r => r.worker_id === pending.id && !r.check_out)
     const initials = pending.name.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase()
     const isEntry = !open
-    const actionColor = isEntry ? 'var(--green)' : 'var(--red)'
     const statusText = open
       ? `En jornada desde ${new Date(open.check_in).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })} · ${formatDur((Date.now() - new Date(open.check_in)) / 60000)}`
       : 'Listo para empezar jornada'
-
     return (
       <div className="pin-wrap">
         <div className="confirm-wrap">
@@ -313,7 +320,12 @@ function PinView({ workers, records, reload, showToast }) {
           <div className="confirm-status">{statusText}</div>
           <div className="confirm-btns">
             <button className="btn-cancel" onClick={() => setPending(null)}>Cancelar</button>
-            <button className="btn-action" style={{ background: actionColor }} onClick={confirm} disabled={working}>
+            <button
+              className="btn-action"
+              style={{ background: isEntry ? 'var(--green)' : 'var(--red)', color: isEntry ? 'var(--surface)' : '#fff' }}
+              onClick={confirm}
+              disabled={working}
+            >
               {working ? '📍 Obteniendo ubicación...' : isEntry ? 'Fichar ENTRADA' : 'Fichar SALIDA'}
             </button>
           </div>
@@ -324,10 +336,13 @@ function PinView({ workers, records, reload, showToast }) {
 
   return (
     <div className="pin-wrap">
-      <div className="pin-title">Control de Jornada</div>
-      <div className="pin-sub">Introduce tu PIN personal</div>
+      <div className="pin-header">
+        <img className="pin-logo" src={LOGO} alt="Estapé 1920" />
+        <div className="pin-title">Control de Jornada</div>
+        <div className="pin-sub">Introduce tu PIN personal</div>
+      </div>
       <div className="pin-dots">
-        {[0, 1, 2, 3].map(i => <div key={i} className={`pin-dot ${i < buf.length ? 'filled' : ''}`} />)}
+        {[0,1,2,3].map(i => <div key={i} className={`pin-dot ${i < buf.length ? 'filled' : ''}`} />)}
       </div>
       <div className="pin-pad">
         {['1','2','3','4','5','6','7','8','9'].map(d => (
@@ -346,9 +361,7 @@ function PinView({ workers, records, reload, showToast }) {
 function HistoryView({ workers, records }) {
   const [filterWorker, setFilterWorker] = useState('')
   const [filterMonth, setFilterMonth] = useState('')
-
   const months = [...new Set(records.map(r => r.check_in.slice(0, 7)))].sort().reverse()
-
   let recs = [...records]
   if (filterWorker) recs = recs.filter(r => r.worker_id === filterWorker)
   if (filterMonth) recs = recs.filter(r => r.check_in.startsWith(filterMonth))
@@ -361,15 +374,7 @@ function HistoryView({ workers, records }) {
       const dur = cout ? Math.round((cout - cin) / 60000) : ''
       const li = r.location_in?.lat ? r.location_in : null
       const lo = r.location_out?.lat ? r.location_out : null
-      return [
-        r.worker_name,
-        cin.toLocaleDateString('es-ES'),
-        cin.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
-        li ? li.lat : '', li ? li.lng : '',
-        cout ? cout.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '',
-        lo ? lo.lat : '', lo ? lo.lng : '',
-        dur, r.auto ? 'Sí' : 'No',
-      ].join(';')
+      return [r.worker_name, cin.toLocaleDateString('es-ES'), cin.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }), li ? li.lat : '', li ? li.lng : '', cout ? cout.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '', lo ? lo.lat : '', lo ? lo.lng : '', dur, r.auto ? 'Sí' : 'No'].join(';')
     })
     const csv = '\uFEFF' + [header, ...rows].join('\n')
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
@@ -388,26 +393,18 @@ function HistoryView({ workers, records }) {
         </select>
         <select className="sel" value={filterMonth} onChange={e => setFilterMonth(e.target.value)}>
           <option value="">Todos los meses</option>
-          {months.map(m => {
-            const [y, mo] = m.split('-')
-            return <option key={m} value={m}>{new Date(y, mo - 1).toLocaleString('es-ES', { month: 'long', year: 'numeric' })}</option>
-          })}
+          {months.map(m => { const [y, mo] = m.split('-'); return <option key={m} value={m}>{new Date(y, mo-1).toLocaleString('es-ES', { month: 'long', year: 'numeric' })}</option> })}
         </select>
         <button className="btn-export" onClick={exportCSV}>⬇ Exportar CSV</button>
       </div>
       {recs.length === 0 ? <div className="empty">Sin registros para este filtro</div> : (
         <table>
-          <thead>
-            <tr>
-              <th>Trabajador</th><th>Fecha</th><th>Entrada</th><th>Ubic. entrada</th>
-              <th>Salida</th><th>Ubic. salida</th><th>Duración</th>
-            </tr>
-          </thead>
+          <thead><tr><th>Trabajador</th><th>Fecha</th><th>Entrada</th><th>Ubic. entrada</th><th>Salida</th><th>Ubic. salida</th><th>Duración</th></tr></thead>
           <tbody>
             {recs.map(r => {
               const cin = new Date(r.check_in)
               const cout = r.check_out ? new Date(r.check_out) : null
-              const dur = cout ? formatDur((cout - cin) / 60000) : <span style={{ color: 'var(--green)' }}>En jornada</span>
+              const dur = cout ? formatDur((cout-cin)/60000) : <span style={{color:'var(--green)'}}>En jornada</span>
               return (
                 <tr key={r.id}>
                   <td>{r.worker_name}</td>
@@ -431,7 +428,6 @@ function HistoryView({ workers, records }) {
 function AdminView({ workers, records, reload, showToast }) {
   const [name, setName] = useState('')
   const [pin, setPin] = useState('')
-
   const active = records.filter(r => !r.check_out)
 
   async function addWorker() {
@@ -446,14 +442,12 @@ function AdminView({ workers, records, reload, showToast }) {
   async function removeWorker(id) {
     if (!confirm('¿Eliminar trabajador? Se conservarán sus registros.')) return
     await supabase.from('workers').delete().eq('id', id)
-    await reload()
-    showToast('Trabajador eliminado')
+    await reload(); showToast('Trabajador eliminado')
   }
 
   async function forceOut(recId) {
     await supabase.from('records').update({ check_out: new Date().toISOString() }).eq('id', recId)
-    await reload()
-    showToast('Salida registrada manualmente')
+    await reload(); showToast('Salida registrada manualmente')
   }
 
   return (
@@ -478,10 +472,7 @@ function AdminView({ workers, records, reload, showToast }) {
               return (
                 <div className="worker-row" key={w.id}>
                   <div>
-                    <div className="worker-name">
-                      {w.name}
-                      {isIn && <span className="badge"><span className="badge-dot" />En jornada</span>}
-                    </div>
+                    <div className="worker-name">{w.name}{isIn && <span className="badge"><span className="badge-dot" />En jornada</span>}</div>
                     <div className="worker-pin">PIN: {'●'.repeat(4)}</div>
                   </div>
                   <button className="btn-sm danger" onClick={() => removeWorker(w.id)}>Eliminar</button>
@@ -500,7 +491,7 @@ function AdminView({ workers, records, reload, showToast }) {
               return (
                 <div className="active-row" key={r.id}>
                   <div>
-                    <div style={{ fontWeight: 600 }}>{r.worker_name}</div>
+                    <div style={{ fontWeight: 600, color: 'var(--white)' }}>{r.worker_name}</div>
                     <div className="active-since">Desde {cin.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })} · {formatDur(mins)}</div>
                   </div>
                   <button className="btn-force" onClick={() => forceOut(r.id)}>Fichar salida</button>
@@ -522,8 +513,7 @@ function AdminPinModal({ onSuccess, onClose }) {
   function press(d) {
     if (buf.length >= 4) return
     const next = buf + d
-    setBuf(next)
-    setErr('')
+    setBuf(next); setErr('')
     if (next.length === 4) {
       if (next === ADMIN_PIN) { onSuccess() }
       else { setErr('PIN incorrecto'); setTimeout(() => setBuf(''), 600) }
@@ -538,7 +528,7 @@ function AdminPinModal({ onSuccess, onClose }) {
         <div className="modal-title">Acceso administrador</div>
         <div className="modal-sub">Introduce el PIN de administrador</div>
         <div className="pin-dots" style={{ marginBottom: 20 }}>
-          {[0, 1, 2, 3].map(i => <div key={i} className={`pin-dot ${i < buf.length ? 'filled' : ''}`} />)}
+          {[0,1,2,3].map(i => <div key={i} className={`pin-dot ${i < buf.length ? 'filled' : ''}`} />)}
         </div>
         <div className="pin-pad">
           {['1','2','3','4','5','6','7','8','9'].map(d => (
