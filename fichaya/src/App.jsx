@@ -228,13 +228,11 @@ export default function App() {
       </div>
       <nav className="nav">
         <button className={`nav-btn ${view === 'pin' ? 'active' : ''}`} onClick={() => handleNav('pin')}>⏱ Fichar</button>
-        <button className={`nav-btn ${view === 'history' ? 'active' : ''}`} onClick={() => handleNav('history')}>📋 Historial</button>
         <button className={`nav-btn ${view === 'admin' ? 'active' : ''}`} onClick={() => handleNav('admin')}>⚙️ Admin</button>
       </nav>
       <main>
         {loading ? <div className="loading"><div className="spinner" /> Cargando...</div> : <>
           {view === 'pin' && <PinView workers={workers} records={records} reload={reload} showToast={showToast} />}
-          {view === 'history' && <HistoryView workers={workers} records={records} />}
           {view === 'admin' && <AdminView workers={workers} records={records} reload={reload} showToast={showToast} />}
         </>}
       </main>
@@ -428,6 +426,7 @@ function HistoryView({ workers, records }) {
 function AdminView({ workers, records, reload, showToast }) {
   const [name, setName] = useState('')
   const [pin, setPin] = useState('')
+  const [adminTab, setAdminTab] = useState('dashboard')
   const active = records.filter(r => !r.check_out)
 
   async function addWorker() {
@@ -452,6 +451,14 @@ function AdminView({ workers, records, reload, showToast }) {
 
   return (
     <div>
+      <div style={{display:'flex',gap:'8px',marginBottom:'24px',borderBottom:'1px solid var(--border)',paddingBottom:'12px'}}>
+        <button onClick={() => setAdminTab('dashboard')} style={{background: adminTab==='dashboard' ? 'var(--card)' : 'none', border:'none', color: adminTab==='dashboard' ? 'var(--accent)' : 'var(--muted)', padding:'7px 16px', borderRadius:'6px', cursor:'pointer', fontFamily:'inherit', fontSize:'.82rem', fontWeight:'500', borderBottom: adminTab==='dashboard' ? '2px solid var(--accent)' : '2px solid transparent'}}>📊 Panel</button>
+        <button onClick={() => setAdminTab('history')} style={{background: adminTab==='history' ? 'var(--card)' : 'none', border:'none', color: adminTab==='history' ? 'var(--accent)' : 'var(--muted)', padding:'7px 16px', borderRadius:'6px', cursor:'pointer', fontFamily:'inherit', fontSize:'.82rem', fontWeight:'500', borderBottom: adminTab==='history' ? '2px solid var(--accent)' : '2px solid transparent'}}>📋 Historial</button>
+      </div>
+
+      {adminTab === 'history' && <HistoryView workers={workers} records={records} />}
+
+      {adminTab === 'dashboard' && <div>
       <div className="stat-grid">
         <div className="stat"><div className="stat-val">{records.length}</div><div className="stat-lbl">Registros totales</div></div>
         <div className="stat"><div className="stat-val">{active.length}</div><div className="stat-lbl">En jornada ahora</div></div>
@@ -501,6 +508,7 @@ function AdminView({ workers, records, reload, showToast }) {
           }
         </div>
       </div>
+    </div>}
     </div>
   )
 }
