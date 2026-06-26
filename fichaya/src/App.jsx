@@ -52,8 +52,7 @@ const css = `
     background: var(--surface); border: 1px solid var(--border);
     border-radius: 9px; padding: 10px 14px; font-size: .84rem; margin-bottom: 6px;
   }
-`  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600&display=swap');
-  :root {
+`  :root {
     --bg:      #3a3a3a;
     --surface: #2e2e2e;
     --card:    #343434;
