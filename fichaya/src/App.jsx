@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
+import * as XLSX from 'xlsx'
 import { supabase } from './lib/supabase'
 
 const ADMIN_PIN = import.meta.env.VITE_ADMIN_PIN || '1234'
@@ -483,36 +484,54 @@ function HistoryView({ workers, records }) {
   if (filterWorker) recs = recs.filter(r => r.worker_id === filterWorker)
   if (filterMonth) recs = recs.filter(r => r.check_in.startsWith(filterMonth))
 
-  function exportCSV() {
-    const header = [
-      `Empresa: ${EMPRESA.nombre}`,
-      `CIF: ${EMPRESA.cif}`,
-      `Código cuenta cotización SS: ${EMPRESA.ccc}`,
-      '',
-      'Trabajador;DNI/NIE;Tipo jornada;Fecha;Hora entrada;Lat entrada;Lng entrada;Hora salida;Lat salida;Lng salida;Duración (min);Salida automática;Firma URL'
-    ].join('\n')
-    const rows = [...recs].reverse().map(r => {
+  function exportXLSX() {
+    const wb = XLSX.utils.book_new()
+
+    // Header rows with company info
+    const headerRows = [
+      [`Empresa: ${EMPRESA.nombre}`],
+      [`CIF: ${EMPRESA.cif}`],
+      [`Código cuenta cotización SS: ${EMPRESA.ccc}`],
+      [`Período: ${filterMonth ? new Date(filterMonth + '-01').toLocaleString('es-ES', { month: 'long', year: 'numeric' }) : 'Completo'}`],
+      [],
+    ]
+
+    // Data rows
+    const colHeaders = ['Trabajador', 'DNI/NIE', 'Tipo jornada', 'Fecha', 'Hora entrada', 'Ubicación entrada', 'Hora salida', 'Ubicación salida', 'Duración', 'Salida auto.', 'Firma']
+    const dataRows = [...recs].reverse().map(r => {
       const cin = new Date(r.check_in)
       const cout = r.check_out ? new Date(r.check_out) : null
-      const dur = cout ? Math.round((cout - cin) / 60000) : ''
+      const dur = cout ? formatDur((cout - cin) / 60000) : 'En jornada'
       const li = r.location_in?.lat ? r.location_in : null
       const lo = r.location_out?.lat ? r.location_out : null
       return [
-        r.worker_name, r.worker_dni || '', r.worker_jornada || '',
+        r.worker_name,
+        r.worker_dni || '',
+        r.worker_jornada || '',
         cin.toLocaleDateString('es-ES'),
         cin.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
-        li ? li.lat : '', li ? li.lng : '',
+        li ? `https://maps.google.com/?q=${li.lat},${li.lng}` : '',
         cout ? cout.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '',
-        lo ? lo.lat : '', lo ? lo.lng : '',
-        dur, r.auto ? 'Sí' : 'No', r.firma_url || ''
-      ].join(';')
+        lo ? `https://maps.google.com/?q=${lo.lat},${lo.lng}` : '',
+        dur,
+        r.auto ? 'Sí' : 'No',
+        r.firma_url ? 'Sí (ver app)' : 'No'
+      ]
     })
-    const csv = '\uFEFF' + [header, ...rows].join('\n')
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a'); a.href = url
-    a.download = `fichajes_${filterMonth || 'completo'}.csv`
-    a.click(); URL.revokeObjectURL(url)
+
+    const allRows = [...headerRows, colHeaders, ...dataRows]
+    const ws = XLSX.utils.aoa_to_sheet(allRows)
+
+    // Column widths
+    ws['!cols'] = [
+      { wch: 22 }, { wch: 12 }, { wch: 16 }, { wch: 12 },
+      { wch: 12 }, { wch: 36 }, { wch: 12 }, { wch: 36 },
+      { wch: 10 }, { wch: 10 }, { wch: 10 }
+    ]
+
+    XLSX.utils.book_append_sheet(wb, ws, 'Fichajes')
+    const label = filterMonth || 'completo'
+    XLSX.writeFile(wb, `fichajes_${label}.xlsx`)
   }
 
   return (
@@ -526,7 +545,7 @@ function HistoryView({ workers, records }) {
           <option value="">Todos los meses</option>
           {months.map(m => { const [y, mo] = m.split('-'); return <option key={m} value={m}>{new Date(y, mo-1).toLocaleString('es-ES', { month: 'long', year: 'numeric' })}</option> })}
         </select>
-        <button className="btn-export" onClick={exportCSV}>⬇ Exportar CSV</button>
+        <button className="btn-export" onClick={exportXLSX}>⬇ Exportar Excel</button>
       </div>
       {recs.length === 0 ? <div className="empty">Sin registros para este filtro</div> : (
         <table>
