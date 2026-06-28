@@ -625,6 +625,15 @@ function AdminView({ workers, records, reload, showToast }) {
     await reload(); showToast('Trabajador eliminado')
   }
 
+  async function updateWorker(id, name, pin) {
+    if (!name.trim() || !/^\d{4}$/.test(pin)) { showToast('Nombre y PIN de 4 dígitos requeridos', 'err'); return false }
+    const conflict = workers.find(w => w.pin === pin && w.id !== id)
+    if (conflict) { showToast('Ese PIN ya está en uso', 'err'); return false }
+    await supabase.from('workers').update({ name: name.trim(), pin }).eq('id', id)
+    await reload(); showToast('Trabajador actualizado ✓')
+    return true
+  }
+
   async function forceOut(recId) {
     await supabase.from('records').update({ check_out: new Date().toISOString() }).eq('id', recId)
     await reload(); showToast('Salida registrada manualmente')
@@ -661,13 +670,7 @@ function AdminView({ workers, records, reload, showToast }) {
             {workers.map(w => {
               const isIn = records.some(r => r.worker_id === w.id && !r.check_out)
               return (
-                <div className="worker-row" key={w.id}>
-                  <div>
-                    <div className="worker-name">{w.name}{isIn && <span className="badge"><span className="badge-dot" />En jornada</span>}</div>
-                    <div className="worker-pin">PIN: {'●'.repeat(4)}</div>
-                  </div>
-                  <button className="btn-sm danger" onClick={() => removeWorker(w.id)}>Eliminar</button>
-                </div>
+                <WorkerRow key={w.id} w={w} isIn={isIn} onRemove={removeWorker} onUpdate={updateWorker} />
               )
             })}
           </div>
@@ -693,6 +696,70 @@ function AdminView({ workers, records, reload, showToast }) {
         </div>
       </div>
     </div>}
+    </div>
+  )
+}
+
+// ─── WORKER ROW (editable) ────────────────────────────
+function WorkerRow({ w, isIn, onRemove, onUpdate }) {
+  const [editing, setEditing] = useState(false)
+  const [name, setName] = useState(w.name)
+  const [pin, setPin] = useState(w.pin)
+
+  async function save() {
+    const ok = await onUpdate(w.id, name, pin)
+    if (ok) setEditing(false)
+  }
+
+  function cancel() {
+    setName(w.name); setPin(w.pin); setEditing(false)
+  }
+
+  return (
+    <div className="worker-row" style={ editing ? { borderColor: 'var(--accent)', background: 'rgba(181,201,160,.04)' } : {} }>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div>
+          <div className="worker-name">
+            {w.name}
+            {isIn && <span className="badge"><span className="badge-dot" />En jornada</span>}
+          </div>
+          <div className="worker-pin">{editing ? `PIN visible: ${pin}` : 'PIN: ●●●●'}</div>
+        </div>
+        <div style={{ display: 'flex', gap: 6 }}>
+          {!editing
+            ? <button className="btn-sm" style={{ background: 'none', border: '1px solid var(--border)', color: 'var(--muted)', fontSize: '.75rem', padding: '6px 12px' }} onClick={() => setEditing(true)}>✏️ Editar</button>
+            : <button className="btn-sm" style={{ background: 'none', border: '1px solid var(--border)', color: 'var(--muted)', fontSize: '.75rem', padding: '6px 12px' }} onClick={cancel}>✕ Cancelar</button>
+          }
+          <button className="btn-sm danger" style={{ fontSize: '.75rem', padding: '6px 10px' }} onClick={() => onRemove(w.id)}>🗑</button>
+        </div>
+      </div>
+
+      {editing && (
+        <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <input
+              className="inp"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              placeholder="Nombre"
+              style={{ background: 'var(--bg)' }}
+            />
+            <input
+              className="inp"
+              value={pin}
+              onChange={e => setPin(e.target.value)}
+              placeholder="PIN"
+              maxLength={4}
+              style={{ width: 80, flex: 'none', background: 'var(--bg)', fontFamily: 'monospace', letterSpacing: '.1em' }}
+            />
+          </div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button className="btn-sm" onClick={save}>✓ Guardar</button>
+            <button className="btn-sm" style={{ background: 'none', border: '1px solid var(--border)', color: 'var(--muted)' }} onClick={cancel}>Cancelar</button>
+          </div>
+          <div style={{ fontSize: '.72rem', color: 'var(--muted)' }}>El PIN debe ser de 4 dígitos numéricos</div>
+        </div>
+      )}
     </div>
   )
 }
