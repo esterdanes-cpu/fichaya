@@ -3,67 +3,14 @@ import { supabase } from './lib/supabase'
 
 const ADMIN_PIN = import.meta.env.VITE_ADMIN_PIN || '1234'
 const AUTO_HOURS = 8
+const EMPRESA = { nombre: 'Hort de Proximitat S.L', cif: 'B60279783', ccc: '08/1876863-36' }
 const LOGO = 'data:image/jpeg;base64,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'
-// ─── STYLES ────────────────────────────────────────────
+
 const css = `
-  /* DOCS */
-  .worker-menu { max-width: 360px; margin: 0 auto; }
-  .menu-greeting { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 700; color: var(--white); margin-bottom: 4px; }
-  .menu-sub { color: var(--muted); font-size: .82rem; margin-bottom: 28px; }
-  .menu-btns { display: flex; flex-direction: column; gap: 12px; }
-  .menu-btn {
-    background: var(--card); border: 1px solid var(--border);
-    color: var(--text); font-size: 1rem; font-weight: 600;
-    padding: 20px 24px; border-radius: 12px; cursor: pointer;
-    text-align: left; font-family: inherit; transition: all .15s;
-    display: flex; align-items: center; gap: 14px;
-  }
-  .menu-btn:hover { border-color: var(--accent); color: var(--white); }
-  .menu-btn .menu-icon { font-size: 1.4rem; }
-  .menu-btn .menu-label { display: flex; flex-direction: column; gap: 2px; }
-  .menu-btn .menu-lbl-main { font-size: .95rem; font-weight: 600; color: var(--white); }
-  .menu-btn .menu-lbl-sub { font-size: .75rem; color: var(--muted); font-weight: 400; }
-  .menu-btn-back { background: none; border: none; color: var(--muted); font-size: .82rem; cursor: pointer; font-family: inherit; margin-bottom: 20px; display: flex; align-items: center; gap: 6px; padding: 0; }
-  .doc-list { display: flex; flex-direction: column; gap: 10px; }
-  .doc-row {
-    display: flex; align-items: center; justify-content: space-between;
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 10px; padding: 14px 16px;
-  }
-  .doc-info { display: flex; align-items: center; gap: 12px; }
-  .doc-icon { font-size: 1.5rem; }
-  .doc-name { font-weight: 600; color: var(--white); font-size: .9rem; }
-  .doc-date { font-size: .72rem; color: var(--muted); margin-top: 2px; }
-  .btn-download {
-    background: var(--accent); border: none; color: var(--surface);
-    font-size: .78rem; font-weight: 700; padding: 8px 14px;
-    border-radius: 8px; cursor: pointer; font-family: inherit; white-space: nowrap;
-  }
-  .admin-doc-section { margin-top: 20px; }
-  .doc-upload-row { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
-  .file-input-label {
-    background: var(--surface); border: 1px dashed var(--border);
-    color: var(--muted); font-size: .8rem; padding: 9px 14px;
-    border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px;
-  }
-  .file-input-label:hover { border-color: var(--accent); color: var(--accent); }
-  .doc-admin-row {
-    display: flex; align-items: center; justify-content: space-between;
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 9px; padding: 10px 14px; font-size: .84rem; margin-bottom: 6px;
-  }
   :root {
-    --bg:      #3a3a3a;
-    --surface: #2e2e2e;
-    --card:    #343434;
-    --border:  #4a4a4a;
-    --accent:  #b5c9a0;
-    --green:   #7aad5a;
-    --red:     #d96b5a;
-    --amber:   #d4a85a;
-    --text:    #f0ede8;
-    --muted:   #9a9590;
-    --white:   #ffffff;
+    --bg: #3a3a3a; --surface: #2e2e2e; --card: #343434; --border: #4a4a4a;
+    --accent: #b5c9a0; --green: #7aad5a; --red: #d96b5a; --amber: #d4a85a;
+    --text: #f0ede8; --muted: #9a9590; --white: #ffffff;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   body { background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; min-height: 100dvh; }
@@ -76,15 +23,12 @@ const css = `
   .logo-name { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 900; color: var(--white); letter-spacing: .04em; text-transform: uppercase; }
   .logo-sub { font-size: .65rem; color: var(--accent); letter-spacing: .12em; text-transform: uppercase; font-weight: 500; }
   .clock { font-size: .78rem; color: var(--muted); font-variant-numeric: tabular-nums; }
-
   .nav { background: var(--surface); border-bottom: 1px solid var(--border); display: flex; gap: 2px; padding: 8px 16px; }
   .nav-btn { background: none; border: none; cursor: pointer; color: var(--muted); font-size: .8rem; font-weight: 500; padding: 7px 16px; border-radius: 6px; transition: all .15s; font-family: inherit; border-bottom: 2px solid transparent; }
   .nav-btn.active { background: var(--card); color: var(--accent); border-bottom: 2px solid var(--accent); }
   .nav-btn:hover { background: var(--card); color: var(--text); }
-
   main { flex: 1; padding: 28px 20px; max-width: 900px; margin: 0 auto; width: 100%; }
 
-  /* PIN */
   .pin-wrap { max-width: 320px; margin: 0 auto; }
   .pin-header { text-align: center; margin-bottom: 28px; }
   .pin-logo { width: 60px; height: 60px; border-radius: 12px; object-fit: cover; margin: 0 auto 14px; display: block; }
@@ -101,7 +45,6 @@ const css = `
   .pin-msg { text-align: center; font-size: .82rem; min-height: 22px; margin-top: 4px; }
   .pin-msg.err { color: var(--red); }
 
-  /* CONFIRM */
   .confirm-wrap { text-align: center; }
   .avatar { width: 72px; height: 72px; border-radius: 50%; background: var(--accent); color: var(--surface); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; font-weight: 700; margin: 0 auto 16px; font-family: 'Playfair Display', serif; }
   .confirm-name { font-family: 'Playfair Display', serif; font-size: 1.25rem; font-weight: 700; color: var(--white); margin-bottom: 6px; }
@@ -111,7 +54,23 @@ const css = `
   .btn-action { flex: 2; border: none; padding: 14px; border-radius: 10px; cursor: pointer; font-size: .95rem; font-weight: 700; font-family: inherit; transition: opacity .15s; }
   .btn-action:disabled { opacity: .6; cursor: not-allowed; }
 
-  /* HISTORY */
+  .menu-btns { display: flex; flex-direction: column; gap: 12px; }
+  .menu-btn { background: var(--card); border: 1px solid var(--border); color: var(--text); font-size: 1rem; font-weight: 600; padding: 20px 24px; border-radius: 12px; cursor: pointer; text-align: left; font-family: inherit; transition: all .15s; display: flex; align-items: center; gap: 14px; width: 100%; }
+  .menu-btn:hover { border-color: var(--accent); color: var(--white); }
+  .menu-icon { font-size: 1.4rem; }
+  .menu-label { display: flex; flex-direction: column; gap: 2px; }
+  .menu-lbl-main { font-size: .95rem; font-weight: 600; color: var(--white); }
+  .menu-lbl-sub { font-size: .75rem; color: var(--muted); font-weight: 400; }
+  .menu-btn-back { background: none; border: none; color: var(--muted); font-size: .82rem; cursor: pointer; font-family: inherit; margin-bottom: 20px; display: flex; align-items: center; gap: 6px; padding: 0; }
+  .firma-badge-info { display: flex; align-items: center; gap: 8px; background: rgba(181,201,160,.1); border: 1px solid rgba(181,201,160,.3); border-radius: 8px; padding: 8px 12px; margin-bottom: 12px; font-size: .78rem; color: var(--accent); }
+
+  .firma-wrap { text-align: center; }
+  .firma-info { color: var(--muted); font-size: .82rem; margin-bottom: 20px; line-height: 1.6; }
+  .firma-canvas-wrap { margin-bottom: 10px; }
+  .firma-canvas-wrap canvas { background: #fff; border: 2px solid var(--accent); border-radius: 10px; width: 100%; display: block; cursor: crosshair; touch-action: none; }
+  .firma-hint { font-size: .72rem; color: var(--muted); margin-bottom: 16px; }
+  .firma-btns { display: flex; gap: 10px; }
+
   .hist-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 20px; }
   .sel { background: var(--card); border: 1px solid var(--border); color: var(--text); font-size: .8rem; padding: 8px 12px; border-radius: 8px; outline: none; cursor: pointer; font-family: inherit; }
   .btn-export { margin-left: auto; background: var(--accent); border: none; color: var(--surface); font-size: .8rem; font-weight: 700; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-family: inherit; }
@@ -124,9 +83,9 @@ const css = `
   .loc-link { color: var(--accent); font-size: .75rem; text-decoration: none; }
   .loc-acc { color: var(--muted); font-size: .7rem; margin-left: 3px; }
   .loc-denied { color: var(--amber); font-size: .73rem; }
+  .firma-thumb { width: 56px; height: 26px; border-radius: 4px; background: #fff; object-fit: contain; }
   .empty { text-align: center; color: var(--muted); padding: 48px; }
 
-  /* ADMIN */
   .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
   .stat { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; border-top: 2px solid var(--accent); }
   .stat-val { font-size: 1.6rem; font-weight: 700; color: var(--white); font-family: 'Playfair Display', serif; }
@@ -135,40 +94,53 @@ const css = `
   @media(max-width:600px) { .admin-grid { grid-template-columns: 1fr; } }
   .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
   .card-title { font-size: .72rem; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 16px; }
-  .input-row { display: flex; gap: 8px; margin-bottom: 10px; }
-  .inp { flex: 1; background: var(--surface); border: 1px solid var(--border); color: var(--text); font-size: .85rem; padding: 9px 12px; border-radius: 8px; outline: none; font-family: inherit; }
+  .input-row { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+  .inp { flex: 1; min-width: 100px; background: var(--surface); border: 1px solid var(--border); color: var(--text); font-size: .85rem; padding: 9px 12px; border-radius: 8px; outline: none; font-family: inherit; }
   .inp:focus { border-color: var(--accent); }
+  select.inp { cursor: pointer; }
   .btn-sm { background: var(--accent); border: none; color: var(--surface); font-size: .8rem; font-weight: 700; padding: 9px 14px; border-radius: 8px; cursor: pointer; white-space: nowrap; font-family: inherit; }
   .btn-sm.danger { background: var(--red); color: #fff; }
+  .btn-sm.ghost { background: none; border: 1px solid var(--border); color: var(--muted); }
+  .btn-sm.ghost:hover { border-color: var(--accent); color: var(--accent); }
   .worker-list { display: flex; flex-direction: column; gap: 8px; }
-  .worker-row { display: flex; align-items: center; justify-content: space-between; background: var(--surface); border: 1px solid var(--border); border-radius: 9px; padding: 10px 14px; font-size: .84rem; }
+  .worker-row { background: var(--surface); border: 1px solid var(--border); border-radius: 9px; padding: 10px 14px; font-size: .84rem; }
   .worker-name { font-weight: 600; color: var(--white); }
   .worker-pin { font-size: .72rem; color: var(--muted); font-family: monospace; margin-top: 2px; }
+  .worker-meta-tag { font-size: .7rem; color: var(--muted); margin-top: 2px; }
   .badge { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; border-radius: 20px; font-size: .7rem; font-weight: 600; background: rgba(181,201,160,.15); color: var(--accent); margin-left: 8px; }
   .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
   .active-row { display: flex; align-items: center; justify-content: space-between; background: rgba(181,201,160,.07); border: 1px solid rgba(181,201,160,.25); border-radius: 9px; padding: 10px 14px; font-size: .84rem; margin-bottom: 8px; }
   .active-since { font-size: .72rem; color: var(--muted); margin-top: 2px; }
   .btn-force { background: none; border: 1px solid var(--red); color: var(--red); font-size: .72rem; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-family: inherit; }
+  .edit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+  .edit-label { font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
 
-  /* MODAL */
+  .doc-list { display: flex; flex-direction: column; gap: 10px; }
+  .doc-row { display: flex; align-items: center; justify-content: space-between; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .doc-info { display: flex; align-items: center; gap: 12px; }
+  .doc-icon { font-size: 1.5rem; }
+  .doc-name { font-weight: 600; color: var(--white); font-size: .9rem; }
+  .doc-date { font-size: .72rem; color: var(--muted); margin-top: 2px; }
+  .btn-download { background: var(--accent); border: none; color: var(--surface); font-size: .78rem; font-weight: 700; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-family: inherit; white-space: nowrap; }
+  .doc-upload-row { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+  .file-input-label { background: var(--surface); border: 1px dashed var(--border); color: var(--muted); font-size: .8rem; padding: 9px 14px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+  .file-input-label:hover { border-color: var(--accent); color: var(--accent); }
+
   .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,.8); z-index: 100; display: flex; align-items: center; justify-content: center; }
   .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px 24px; width: 300px; max-width: 92vw; border-top: 3px solid var(--accent); }
   .modal-title { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; color: var(--white); margin-bottom: 4px; }
   .modal-sub { color: var(--muted); font-size: .8rem; margin-bottom: 20px; }
   .btn-modal-cancel { width: 100%; margin-top: 10px; background: none; border: 1px solid var(--border); color: var(--muted); padding: 10px; border-radius: 8px; cursor: pointer; font-size: .82rem; font-family: inherit; }
 
-  /* TOAST */
   .toast { position: fixed; bottom: max(28px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 22px; font-size: .82rem; white-space: nowrap; box-shadow: 0 8px 32px rgba(0,0,0,.5); z-index: 999; animation: fadeUp .2s ease; }
   .toast.ok { border-color: var(--accent); color: var(--accent); }
   .toast.err { border-color: var(--red); color: var(--red); }
   @keyframes fadeUp { from { opacity:0; transform: translateX(-50%) translateY(10px); } to { opacity:1; transform: translateX(-50%) translateY(0); } }
-
   .loading { display: flex; align-items: center; justify-content: center; height: 120px; color: var(--muted); font-size: .9rem; gap: 10px; }
   .spinner { width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 `
 
-// ─── HELPERS ───────────────────────────────────────────
 function formatDur(mins) {
   const h = Math.floor(mins / 60), m = Math.round(mins % 60)
   return `${h}h ${String(m).padStart(2, '0')}m`
@@ -189,13 +161,9 @@ function LocCell({ loc }) {
   if (!loc) return <span style={{ color: 'var(--muted)' }}>—</span>
   if (loc.error) return <span className="loc-denied">Sin permiso</span>
   const url = `https://www.google.com/maps?q=${loc.lat},${loc.lng}`
-  return <>
-    <a className="loc-link" href={url} target="_blank" rel="noreferrer">📍 Ver mapa</a>
-    <span className="loc-acc">±{loc.acc}m</span>
-  </>
+  return <><a className="loc-link" href={url} target="_blank" rel="noreferrer">📍 Ver mapa</a><span className="loc-acc">±{loc.acc}m</span></>
 }
 
-// ─── SUPABASE QUERIES ──────────────────────────────────
 async function fetchWorkers() {
   const { data } = await supabase.from('workers').select('*').order('name')
   return data || []
@@ -205,7 +173,6 @@ async function fetchRecords() {
   return data || []
 }
 
-// ─── APP ───────────────────────────────────────────────
 export default function App() {
   const [view, setView] = useState('pin')
   const [workers, setWorkers] = useState([])
@@ -224,8 +191,7 @@ export default function App() {
   const reload = useCallback(async () => {
     setLoading(true)
     const [w, r] = await Promise.all([fetchWorkers(), fetchRecords()])
-    setWorkers(w); setRecords(r)
-    setLoading(false)
+    setWorkers(w); setRecords(r); setLoading(false)
   }, [])
 
   useEffect(() => { reload() }, [reload])
@@ -243,8 +209,7 @@ export default function App() {
       }
       if (open.length > 0) reload()
     }
-    const t = setInterval(check, 60000)
-    return () => clearInterval(t)
+    const t = setInterval(check, 60000); return () => clearInterval(t)
   }, [records, reload])
 
   function showToast(msg, type = 'ok') {
@@ -281,12 +246,7 @@ export default function App() {
           {view === 'admin' && <AdminView workers={workers} records={records} reload={reload} showToast={showToast} />}
         </>}
       </main>
-      {showAdminModal && (
-        <AdminPinModal
-          onSuccess={() => { setShowAdminModal(false); setView('admin') }}
-          onClose={() => setShowAdminModal(false)}
-        />
-      )}
+      {showAdminModal && <AdminPinModal onSuccess={() => { setShowAdminModal(false); setView('admin') }} onClose={() => setShowAdminModal(false)} />}
       {toast && <div className={`toast ${toast.type}`}>{toast.msg}</div>}
     </>
   )
@@ -296,35 +256,24 @@ export default function App() {
 function PinView({ workers, records, reload, showToast }) {
   const [buf, setBuf] = useState('')
   const [msg, setMsg] = useState({ text: '', type: '' })
-  const [worker, setWorker] = useState(null)   // identified worker
-  const [screen, setScreen] = useState('pin')  // pin | menu | fichar | docs
+  const [worker, setWorker] = useState(null)
+  const [screen, setScreen] = useState('pin')
   const [working, setWorking] = useState(false)
 
   function press(d) {
     if (buf.length >= 4) return
     const next = buf + d
-    setBuf(next)
-    setMsg({ text: '', type: '' })
+    setBuf(next); setMsg({ text: '', type: '' })
     if (next.length === 4) submit(next)
   }
-
   function del() { setBuf(b => b.slice(0, -1)); setMsg({ text: '', type: '' }) }
 
   function submit(pin) {
-    if (pin === ADMIN_PIN) {
-      setBuf('')
-      window.dispatchEvent(new CustomEvent('goto-admin'))
-      return
-    }
+    if (pin === ADMIN_PIN) { setBuf(''); window.dispatchEvent(new CustomEvent('goto-admin')); return }
     const found = workers.find(w => w.pin === pin)
-    if (!found) {
-      setMsg({ text: 'PIN no reconocido', type: 'err' })
-      setTimeout(() => setBuf(''), 600)
-      return
-    }
-    setBuf('')
-    setWorker(found)
-    setScreen('menu')
+    if (!found) { setMsg({ text: 'PIN no reconocido', type: 'err' }); setTimeout(() => setBuf(''), 600); return }
+    setBuf(''); setWorker(found)
+    if (!found.firma_url) { setScreen('firma') } else { setScreen('menu') }
   }
 
   function goBack() { setWorker(null); setScreen('pin') }
@@ -333,20 +282,24 @@ function PinView({ workers, records, reload, showToast }) {
     if (!worker || working) return
     setWorking(true)
     const loc = await getLocation()
-    await supabase.from('records').insert({ worker_id: worker.id, worker_name: worker.name, check_in: new Date().toISOString(), location_in: loc })
+    await supabase.from('records').insert({
+      worker_id: worker.id, worker_name: worker.name,
+      worker_dni: worker.dni || '', worker_jornada: worker.jornada || 'Tiempo completo',
+      firma_url: worker.firma_url || null,
+      check_in: new Date().toISOString(), location_in: loc
+    })
     showToast(`${worker.name} ha fichado entrada ✓`)
-    await reload()
-    setWorking(false)
-    goBack()
+    await reload(); setWorking(false); goBack()
   }
 
-  useEffect(() => {
-    const h = () => {}
-    window.addEventListener('goto-admin', h)
-    return () => window.removeEventListener('goto-admin', h)
-  }, [])
+  async function onFirmaSaved(firmaUrl) {
+    await supabase.from('workers').update({ firma_url: firmaUrl }).eq('id', worker.id)
+    setWorker(w => ({ ...w, firma_url: firmaUrl }))
+    await reload()
+    setScreen('menu')
+    showToast('Firma guardada ✓')
+  }
 
-  // PIN screen
   if (screen === 'pin') return (
     <div className="pin-wrap">
       <div className="pin-header">
@@ -354,13 +307,9 @@ function PinView({ workers, records, reload, showToast }) {
         <div className="pin-title">Control de Jornada</div>
         <div className="pin-sub">Introduce tu PIN personal</div>
       </div>
-      <div className="pin-dots">
-        {[0,1,2,3].map(i => <div key={i} className={`pin-dot ${i < buf.length ? 'filled' : ''}`} />)}
-      </div>
+      <div className="pin-dots">{[0,1,2,3].map(i => <div key={i} className={`pin-dot ${i < buf.length ? 'filled' : ''}`} />)}</div>
       <div className="pin-pad">
-        {['1','2','3','4','5','6','7','8','9'].map(d => (
-          <button key={d} className="pin-btn" onClick={() => press(d)}>{d}</button>
-        ))}
+        {['1','2','3','4','5','6','7','8','9'].map(d => <button key={d} className="pin-btn" onClick={() => press(d)}>{d}</button>)}
         <button className="pin-btn del" onClick={del}>⌫</button>
         <button className="pin-btn" onClick={() => press('0')}>0</button>
         <button className="pin-btn ok" onClick={() => submit(buf)}>✓</button>
@@ -369,39 +318,38 @@ function PinView({ workers, records, reload, showToast }) {
     </div>
   )
 
-  // Menu screen - after PIN identified
+  if (screen === 'firma') return (
+    <div className="pin-wrap">
+      <FirmaView worker={worker} onSaved={onFirmaSaved} onCancel={goBack} />
+    </div>
+  )
+
   if (screen === 'menu') {
     const open = records.find(r => r.worker_id === worker.id && !r.check_out)
     const initials = worker.name.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase()
     return (
       <div className="pin-wrap">
-        <div className="confirm-wrap" style={{marginBottom: 28}}>
+        <div className="confirm-wrap" style={{ marginBottom: 24 }}>
           <div className="avatar">{initials}</div>
           <div className="confirm-name">{worker.name}</div>
           <div className="confirm-status">{open ? `En jornada desde ${new Date(open.check_in).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}` : 'Bienvenido/a'}</div>
         </div>
+        {worker.firma_url && <div className="firma-badge-info">✅ Firma registrada — se aplica automáticamente</div>}
         <div className="menu-btns">
           <button className="menu-btn" onClick={() => setScreen('fichar')}>
             <span className="menu-icon">🟢</span>
-            <span className="menu-label">
-              <span className="menu-lbl-main">Fichar entrada</span>
-              <span className="menu-lbl-sub">Registrar inicio de jornada</span>
-            </span>
+            <span className="menu-label"><span className="menu-lbl-main">Fichar entrada</span><span className="menu-lbl-sub">Registrar inicio de jornada</span></span>
           </button>
           <button className="menu-btn" onClick={() => setScreen('docs')}>
             <span className="menu-icon">📄</span>
-            <span className="menu-label">
-              <span className="menu-lbl-main">Mis documentos</span>
-              <span className="menu-lbl-sub">Contratos, nóminas y más</span>
-            </span>
+            <span className="menu-label"><span className="menu-lbl-main">Mis documentos</span><span className="menu-lbl-sub">Contratos, nóminas y más</span></span>
           </button>
-          <button className="btn-cancel" onClick={goBack} style={{marginTop:4}}>Salir</button>
+          <button className="btn-cancel" onClick={goBack} style={{ marginTop: 4 }}>Salir</button>
         </div>
       </div>
     )
   }
 
-  // Fichar confirm screen
   if (screen === 'fichar') {
     const initials = worker.name.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase()
     return (
@@ -413,12 +361,7 @@ function PinView({ workers, records, reload, showToast }) {
           <div className="confirm-status">Listo para empezar jornada</div>
           <div className="confirm-btns">
             <button className="btn-cancel" onClick={() => setScreen('menu')}>Cancelar</button>
-            <button
-              className="btn-action"
-              style={{ background: 'var(--green)', color: 'var(--surface)' }}
-              onClick={doFichar}
-              disabled={working}
-            >
+            <button className="btn-action" style={{ background: 'var(--green)', color: 'var(--surface)' }} onClick={doFichar} disabled={working}>
               {working ? '📍 Obteniendo ubicación...' : 'Confirmar ENTRADA'}
             </button>
           </div>
@@ -427,9 +370,8 @@ function PinView({ workers, records, reload, showToast }) {
     )
   }
 
-  // Docs screen
   if (screen === 'docs') return (
-    <div style={{maxWidth: 500, margin: '0 auto'}}>
+    <div style={{ maxWidth: 500, margin: '0 auto' }}>
       <button className="menu-btn-back" onClick={() => setScreen('menu')}>← Volver</button>
       <DocsView workerId={worker.id} workerName={worker.name} isAdmin={false} />
     </div>
@@ -438,100 +380,87 @@ function PinView({ workers, records, reload, showToast }) {
   return null
 }
 
-// ─── DOCS VIEW ─────────────────────────────────────────
-function DocsView({ workerId, workerName, isAdmin, showToast }) {
-  const [docs, setDocs] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [uploading, setUploading] = useState(false)
-  const [selectedFile, setSelectedFile] = useState(null)
-  const [docName, setDocName] = useState('')
+// ─── FIRMA VIEW ────────────────────────────────────────
+function FirmaView({ worker, onSaved, onCancel }) {
+  const canvasRef = useRef(null)
+  const drawing = useRef(false)
+  const lastPos = useRef([0, 0])
+  const [saving, setSaving] = useState(false)
 
-  useEffect(() => { fetchDocs() }, [workerId])
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    canvas.width = canvas.offsetWidth
+    canvas.height = 140
+    const ctx = canvas.getContext('2d')
+    ctx.strokeStyle = '#1a1a1a'
+    ctx.lineWidth = 2.5
+    ctx.lineCap = 'round'
+    ctx.lineJoin = 'round'
 
-  async function fetchDocs() {
-    setLoading(true)
-    const { data } = await supabase.from('documents').select('*').eq('worker_id', workerId).order('created_at', { ascending: false })
-    setDocs(data || [])
-    setLoading(false)
+    function getPos(e, c) {
+      const r = c.getBoundingClientRect()
+      const src = e.touches ? e.touches[0] : e
+      return [src.clientX - r.left, src.clientY - r.top]
+    }
+    function start(e) { e.preventDefault(); drawing.current = true; lastPos.current = getPos(e, canvas) }
+    function move(e) {
+      e.preventDefault()
+      if (!drawing.current) return
+      const [x, y] = getPos(e, canvas)
+      ctx.beginPath(); ctx.moveTo(lastPos.current[0], lastPos.current[1]); ctx.lineTo(x, y); ctx.stroke()
+      lastPos.current = [x, y]
+    }
+    function end() { drawing.current = false }
+
+    canvas.addEventListener('mousedown', start); canvas.addEventListener('mousemove', move); canvas.addEventListener('mouseup', end)
+    canvas.addEventListener('touchstart', start, { passive: false }); canvas.addEventListener('touchmove', move, { passive: false }); canvas.addEventListener('touchend', end)
+    return () => {
+      canvas.removeEventListener('mousedown', start); canvas.removeEventListener('mousemove', move); canvas.removeEventListener('mouseup', end)
+      canvas.removeEventListener('touchstart', start); canvas.removeEventListener('touchmove', move); canvas.removeEventListener('touchend', end)
+    }
+  }, [])
+
+  function clearCanvas() {
+    const canvas = canvasRef.current
+    const ctx = canvas.getContext('2d')
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
   }
 
-  async function upload() {
-    if (!selectedFile || !docName.trim()) return
-    setUploading(true)
-    const ext = selectedFile.name.split('.').pop()
-    const path = `${workerId}/${Date.now()}.${ext}`
-    const { error: upErr } = await supabase.storage.from('documents').upload(path, selectedFile)
-    if (upErr) { showToast && showToast('Error al subir el archivo', 'err'); setUploading(false); return }
-    const { data: { publicUrl } } = supabase.storage.from('documents').getPublicUrl(path)
-    await supabase.from('documents').insert({ worker_id: workerId, worker_name: workerName, name: docName.trim(), url: publicUrl, path, file_type: ext })
-    setDocName(''); setSelectedFile(null)
-    await fetchDocs()
-    setUploading(false)
-    showToast && showToast('Documento subido ✓')
+  async function saveFirma() {
+    const canvas = canvasRef.current
+    const ctx = canvas.getContext('2d')
+    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+    const hasContent = imgData.data.some((v, i) => i % 4 === 3 && v > 0)
+    if (!hasContent) { alert('Por favor, firma en el recuadro antes de continuar'); return }
+    setSaving(true)
+    canvas.toBlob(async (blob) => {
+      const path = `firmas/${worker.id}.png`
+      await supabase.storage.from('documents').upload(path, blob, { upsert: true, contentType: 'image/png' })
+      const { data: { publicUrl } } = supabase.storage.from('documents').getPublicUrl(path)
+      await onSaved(publicUrl)
+      setSaving(false)
+    }, 'image/png')
   }
 
-  async function deleteDoc(doc) {
-    if (!confirm(`¿Eliminar "${doc.name}"?`)) return
-    await supabase.storage.from('documents').remove([doc.path])
-    await supabase.from('documents').delete().eq('id', doc.id)
-    await fetchDocs()
-    showToast && showToast('Documento eliminado')
-  }
-
-  function fileIcon(ext) {
-    if (!ext) return '📄'
-    if (['pdf'].includes(ext)) return '📕'
-    if (['jpg','jpeg','png','gif','webp'].includes(ext)) return '🖼️'
-    if (['doc','docx'].includes(ext)) return '📝'
-    if (['xls','xlsx'].includes(ext)) return '📊'
-    return '📄'
-  }
-
-  if (loading) return <div className="loading"><div className="spinner" /> Cargando documentos...</div>
-
+  const initials = worker.name.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase()
   return (
-    <div>
-      {!isAdmin && <div style={{marginBottom:20}}>
-        <div style={{fontFamily:"'Playfair Display',serif", fontSize:'1.1rem', fontWeight:700, color:'var(--white)', marginBottom:4}}>Mis documentos</div>
-        <div style={{color:'var(--muted)', fontSize:'.82rem'}}>Documentos compartidos por la empresa</div>
-      </div>}
-
-      {isAdmin && (
-        <div className="admin-doc-section">
-          <div className="card-title" style={{marginBottom:12}}>Subir documento para {workerName}</div>
-          <div className="doc-upload-row">
-            <input className="inp" placeholder="Nombre del documento (ej. Nómina junio 2025)" value={docName} onChange={e => setDocName(e.target.value)} style={{minWidth:200}} />
-            <label className="file-input-label">
-              📎 {selectedFile ? selectedFile.name.slice(0,20)+'...' : 'Elegir archivo'}
-              <input type="file" style={{display:'none'}} accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xls,.xlsx" onChange={e => setSelectedFile(e.target.files[0])} />
-            </label>
-            <button className="btn-sm" onClick={upload} disabled={uploading || !selectedFile || !docName.trim()}>
-              {uploading ? 'Subiendo...' : 'Subir'}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {docs.length === 0
-        ? <div className="empty" style={{padding:32}}>Sin documentos todavía</div>
-        : <div className="doc-list">
-            {docs.map(doc => (
-              <div className="doc-row" key={doc.id}>
-                <div className="doc-info">
-                  <span className="doc-icon">{fileIcon(doc.file_type)}</span>
-                  <div>
-                    <div className="doc-name">{doc.name}</div>
-                    <div className="doc-date">{new Date(doc.created_at).toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'})}</div>
-                  </div>
-                </div>
-                <div style={{display:'flex',gap:8,alignItems:'center'}}>
-                  <a className="btn-download" href={doc.url} target="_blank" rel="noreferrer" download>⬇ Descargar</a>
-                  {isAdmin && <button className="btn-sm danger" onClick={() => deleteDoc(doc)} style={{padding:'8px 10px'}}>✕</button>}
-                </div>
-              </div>
-            ))}
-          </div>
-      }
+    <div className="firma-wrap">
+      <div className="avatar">{initials}</div>
+      <div className="confirm-name" style={{ marginBottom: 8 }}>{worker.name}</div>
+      <div className="firma-info">
+        Para cumplir con la normativa laboral,<br />necesitas firmar una vez para validar tus fichajes.<br />
+        <strong style={{ color: 'var(--white)' }}>Solo se te pedirá esta vez.</strong>
+      </div>
+      <div className="firma-canvas-wrap"><canvas ref={canvasRef} /></div>
+      <div className="firma-hint">✍️ Firma con el dedo en el recuadro blanco</div>
+      <div className="firma-btns">
+        <button className="btn-cancel" onClick={clearCanvas}>Borrar</button>
+        <button className="btn-action" style={{ background: 'var(--accent)', color: 'var(--surface)' }} onClick={saveFirma} disabled={saving}>
+          {saving ? 'Guardando...' : 'Confirmar firma →'}
+        </button>
+      </div>
+      <button className="menu-btn-back" style={{ marginTop: 16, justifyContent: 'center' }} onClick={onCancel}>Cancelar</button>
     </div>
   )
 }
@@ -546,14 +475,28 @@ function HistoryView({ workers, records }) {
   if (filterMonth) recs = recs.filter(r => r.check_in.startsWith(filterMonth))
 
   function exportCSV() {
-    const header = 'Trabajador;Fecha;Hora entrada;Lat entrada;Lng entrada;Hora salida;Lat salida;Lng salida;Duración (min);Salida automática'
+    const header = [
+      `Empresa: ${EMPRESA.nombre}`,
+      `CIF: ${EMPRESA.cif}`,
+      `Código cuenta cotización SS: ${EMPRESA.ccc}`,
+      '',
+      'Trabajador;DNI/NIE;Tipo jornada;Fecha;Hora entrada;Lat entrada;Lng entrada;Hora salida;Lat salida;Lng salida;Duración (min);Salida automática;Firma URL'
+    ].join('\n')
     const rows = [...recs].reverse().map(r => {
       const cin = new Date(r.check_in)
       const cout = r.check_out ? new Date(r.check_out) : null
       const dur = cout ? Math.round((cout - cin) / 60000) : ''
       const li = r.location_in?.lat ? r.location_in : null
       const lo = r.location_out?.lat ? r.location_out : null
-      return [r.worker_name, cin.toLocaleDateString('es-ES'), cin.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }), li ? li.lat : '', li ? li.lng : '', cout ? cout.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '', lo ? lo.lat : '', lo ? lo.lng : '', dur, r.auto ? 'Sí' : 'No'].join(';')
+      return [
+        r.worker_name, r.worker_dni || '', r.worker_jornada || '',
+        cin.toLocaleDateString('es-ES'),
+        cin.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }),
+        li ? li.lat : '', li ? li.lng : '',
+        cout ? cout.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '',
+        lo ? lo.lat : '', lo ? lo.lng : '',
+        dur, r.auto ? 'Sí' : 'No', r.firma_url || ''
+      ].join(';')
     })
     const csv = '\uFEFF' + [header, ...rows].join('\n')
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
@@ -578,7 +521,11 @@ function HistoryView({ workers, records }) {
       </div>
       {recs.length === 0 ? <div className="empty">Sin registros para este filtro</div> : (
         <table>
-          <thead><tr><th>Trabajador</th><th>Fecha</th><th>Entrada</th><th>Ubic. entrada</th><th>Salida</th><th>Ubic. salida</th><th>Duración</th></tr></thead>
+          <thead><tr>
+            <th>Trabajador</th><th>DNI</th><th>Jornada</th><th>Fecha</th>
+            <th>Entrada</th><th>Ubic. entrada</th><th>Salida</th><th>Ubic. salida</th>
+            <th>Duración</th><th>Firma</th>
+          </tr></thead>
           <tbody>
             {recs.map(r => {
               const cin = new Date(r.check_in)
@@ -587,12 +534,15 @@ function HistoryView({ workers, records }) {
               return (
                 <tr key={r.id}>
                   <td>{r.worker_name}</td>
+                  <td style={{fontFamily:'monospace',fontSize:'.75rem'}}>{r.worker_dni || '—'}</td>
+                  <td style={{fontSize:'.72rem',color:'var(--muted)'}}>{r.worker_jornada || '—'}</td>
                   <td>{cin.toLocaleDateString('es-ES', { weekday: 'short', day: '2-digit', month: '2-digit' })}</td>
                   <td>{cin.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}</td>
                   <td><LocCell loc={r.location_in} /></td>
                   <td>{cout ? <>{cout.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}{r.auto && <span className="auto-tag">auto</span>}</> : '—'}</td>
                   <td>{cout ? <LocCell loc={r.location_out} /> : '—'}</td>
-                  <td style={{ color: 'var(--muted)', fontVariantNumeric: 'tabular-nums' }}>{dur}</td>
+                  <td style={{color:'var(--muted)',fontVariantNumeric:'tabular-nums'}}>{dur}</td>
+                  <td>{r.firma_url ? <img className="firma-thumb" src={r.firma_url} alt="firma" /> : <span style={{color:'var(--muted)',fontSize:'.72rem'}}>—</span>}</td>
                 </tr>
               )
             })}
@@ -607,16 +557,17 @@ function HistoryView({ workers, records }) {
 function AdminView({ workers, records, reload, showToast }) {
   const [name, setName] = useState('')
   const [pin, setPin] = useState('')
+  const [dni, setDni] = useState('')
+  const [jornada, setJornada] = useState('Tiempo completo')
   const [adminTab, setAdminTab] = useState('dashboard')
   const active = records.filter(r => !r.check_out)
 
   async function addWorker() {
     if (!name.trim() || !/^\d{4}$/.test(pin)) { showToast('Nombre y PIN de 4 dígitos requeridos', 'err'); return }
     if (workers.some(w => w.pin === pin)) { showToast('Ese PIN ya está en uso', 'err'); return }
-    await supabase.from('workers').insert({ name: name.trim(), pin })
-    setName(''); setPin('')
-    await reload()
-    showToast('Trabajador añadido ✓')
+    await supabase.from('workers').insert({ name: name.trim(), pin, dni: dni.trim(), jornada })
+    setName(''); setPin(''); setDni(''); setJornada('Tiempo completo')
+    await reload(); showToast('Trabajador añadido ✓')
   }
 
   async function removeWorker(id) {
@@ -625,13 +576,12 @@ function AdminView({ workers, records, reload, showToast }) {
     await reload(); showToast('Trabajador eliminado')
   }
 
-  async function updateWorker(id, name, pin) {
-    if (!name.trim() || !/^\d{4}$/.test(pin)) { showToast('Nombre y PIN de 4 dígitos requeridos', 'err'); return false }
-    const conflict = workers.find(w => w.pin === pin && w.id !== id)
+  async function updateWorker(id, data) {
+    if (!data.name.trim() || !/^\d{4}$/.test(data.pin)) { showToast('Nombre y PIN de 4 dígitos requeridos', 'err'); return false }
+    const conflict = workers.find(w => w.pin === data.pin && w.id !== id)
     if (conflict) { showToast('Ese PIN ya está en uso', 'err'); return false }
-    await supabase.from('workers').update({ name: name.trim(), pin }).eq('id', id)
-    await reload(); showToast('Trabajador actualizado ✓')
-    return true
+    await supabase.from('workers').update({ name: data.name.trim(), pin: data.pin, dni: data.dni.trim(), jornada: data.jornada }).eq('id', id)
+    await reload(); showToast('Trabajador actualizado ✓'); return true
   }
 
   async function forceOut(recId) {
@@ -639,151 +589,235 @@ function AdminView({ workers, records, reload, showToast }) {
     await reload(); showToast('Salida registrada manualmente')
   }
 
+  const tabStyle = (t) => ({
+    background: adminTab === t ? 'var(--card)' : 'none', border: 'none',
+    color: adminTab === t ? 'var(--accent)' : 'var(--muted)', padding: '7px 16px',
+    borderRadius: '6px', cursor: 'pointer', fontFamily: 'inherit', fontSize: '.82rem',
+    fontWeight: '500', borderBottom: adminTab === t ? '2px solid var(--accent)' : '2px solid transparent'
+  })
+
   return (
     <div>
-      <div style={{display:'flex',gap:'8px',marginBottom:'24px',borderBottom:'1px solid var(--border)',paddingBottom:'12px'}}>
-        <button onClick={() => setAdminTab('dashboard')} style={{background: adminTab==='dashboard' ? 'var(--card)' : 'none', border:'none', color: adminTab==='dashboard' ? 'var(--accent)' : 'var(--muted)', padding:'7px 16px', borderRadius:'6px', cursor:'pointer', fontFamily:'inherit', fontSize:'.82rem', fontWeight:'500', borderBottom: adminTab==='dashboard' ? '2px solid var(--accent)' : '2px solid transparent'}}>📊 Panel</button>
-        <button onClick={() => setAdminTab('history')} style={{background: adminTab==='history' ? 'var(--card)' : 'none', border:'none', color: adminTab==='history' ? 'var(--accent)' : 'var(--muted)', padding:'7px 16px', borderRadius:'6px', cursor:'pointer', fontFamily:'inherit', fontSize:'.82rem', fontWeight:'500', borderBottom: adminTab==='history' ? '2px solid var(--accent)' : '2px solid transparent'}}>📋 Historial</button>
-        <button onClick={() => setAdminTab('docs')} style={{background: adminTab==='docs' ? 'var(--card)' : 'none', border:'none', color: adminTab==='docs' ? 'var(--accent)' : 'var(--muted)', padding:'7px 16px', borderRadius:'6px', cursor:'pointer', fontFamily:'inherit', fontSize:'.82rem', fontWeight:'500', borderBottom: adminTab==='docs' ? '2px solid var(--accent)' : '2px solid transparent'}}>📄 Documentos</button>
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', borderBottom: '1px solid var(--border)', paddingBottom: '12px' }}>
+        <button onClick={() => setAdminTab('dashboard')} style={tabStyle('dashboard')}>📊 Panel</button>
+        <button onClick={() => setAdminTab('history')} style={tabStyle('history')}>📋 Historial</button>
+        <button onClick={() => setAdminTab('docs')} style={tabStyle('docs')}>📄 Documentos</button>
       </div>
 
       {adminTab === 'history' && <HistoryView workers={workers} records={records} />}
-
       {adminTab === 'docs' && <AdminDocsView workers={workers} showToast={showToast} />}
 
       {adminTab === 'dashboard' && <div>
-      <div className="stat-grid">
-        <div className="stat"><div className="stat-val">{records.length}</div><div className="stat-lbl">Registros totales</div></div>
-        <div className="stat"><div className="stat-val">{active.length}</div><div className="stat-lbl">En jornada ahora</div></div>
-        <div className="stat"><div className="stat-val">{workers.length}</div><div className="stat-lbl">Trabajadores</div></div>
-      </div>
-      <div className="admin-grid">
-        <div className="card">
-          <div className="card-title">Trabajadores</div>
-          <div className="input-row">
-            <input className="inp" placeholder="Nombre" value={name} onChange={e => setName(e.target.value)} />
-            <input className="inp" placeholder="PIN" maxLength={4} type="password" value={pin} onChange={e => setPin(e.target.value)} style={{ width: 80, flex: 'none' }} />
-            <button className="btn-sm" onClick={addWorker}>+</button>
-          </div>
-          <div className="worker-list">
-            {workers.length === 0 && <div className="empty" style={{ padding: 16 }}>Sin trabajadores</div>}
-            {workers.map(w => {
-              const isIn = records.some(r => r.worker_id === w.id && !r.check_out)
-              return (
-                <WorkerRow key={w.id} w={w} isIn={isIn} onRemove={removeWorker} onUpdate={updateWorker} />
-              )
-            })}
-          </div>
+        <div className="stat-grid">
+          <div className="stat"><div className="stat-val">{records.length}</div><div className="stat-lbl">Registros totales</div></div>
+          <div className="stat"><div className="stat-val">{active.length}</div><div className="stat-lbl">En jornada ahora</div></div>
+          <div className="stat"><div className="stat-val">{workers.length}</div><div className="stat-lbl">Trabajadores</div></div>
         </div>
-        <div className="card">
-          <div className="card-title">En jornada ahora</div>
-          {active.length === 0
-            ? <div className="empty" style={{ padding: 20 }}>Nadie trabajando ahora</div>
-            : active.map(r => {
-              const cin = new Date(r.check_in)
-              const mins = Math.round((Date.now() - cin) / 60000)
-              return (
-                <div className="active-row" key={r.id}>
-                  <div>
-                    <div style={{ fontWeight: 600, color: 'var(--white)' }}>{r.worker_name}</div>
-                    <div className="active-since">Desde {cin.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })} · {formatDur(mins)}</div>
+        <div className="admin-grid">
+          <div className="card">
+            <div className="card-title">Trabajadores</div>
+            <div className="input-row">
+              <input className="inp" placeholder="Nombre completo" value={name} onChange={e => setName(e.target.value)} />
+              <input className="inp" placeholder="DNI/NIE" value={dni} onChange={e => setDni(e.target.value)} style={{ maxWidth: 130, flex: 'none' }} />
+            </div>
+            <div className="input-row">
+              <input className="inp" placeholder="PIN (4 dígitos)" maxLength={4} type="password" value={pin} onChange={e => setPin(e.target.value)} style={{ maxWidth: 120, flex: 'none' }} />
+              <select className="inp" value={jornada} onChange={e => setJornada(e.target.value)}>
+                <option>Tiempo completo</option>
+                <option>Tiempo parcial</option>
+              </select>
+              <button className="btn-sm" onClick={addWorker}>+ Añadir</button>
+            </div>
+            <div className="worker-list">
+              {workers.length === 0 && <div className="empty" style={{ padding: 16 }}>Sin trabajadores</div>}
+              {workers.map(w => {
+                const isIn = records.some(r => r.worker_id === w.id && !r.check_out)
+                return <WorkerRow key={w.id} w={w} isIn={isIn} onRemove={removeWorker} onUpdate={updateWorker} />
+              })}
+            </div>
+          </div>
+          <div className="card">
+            <div className="card-title">En jornada ahora</div>
+            {active.length === 0
+              ? <div className="empty" style={{ padding: 20 }}>Nadie trabajando ahora</div>
+              : active.map(r => {
+                const cin = new Date(r.check_in)
+                const mins = Math.round((Date.now() - cin) / 60000)
+                return (
+                  <div className="active-row" key={r.id}>
+                    <div>
+                      <div style={{ fontWeight: 600, color: 'var(--white)' }}>{r.worker_name}</div>
+                      <div className="active-since">Desde {cin.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })} · {formatDur(mins)}</div>
+                    </div>
+                    <button className="btn-force" onClick={() => forceOut(r.id)}>Fichar salida</button>
                   </div>
-                  <button className="btn-force" onClick={() => forceOut(r.id)}>Fichar salida</button>
-                </div>
-              )
-            })
-          }
+                )
+              })
+            }
+          </div>
         </div>
-      </div>
-    </div>}
+      </div>}
     </div>
   )
 }
 
-// ─── WORKER ROW (editable) ────────────────────────────
+// ─── WORKER ROW ────────────────────────────────────────
 function WorkerRow({ w, isIn, onRemove, onUpdate }) {
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(w.name)
   const [pin, setPin] = useState(w.pin)
+  const [dni, setDni] = useState(w.dni || '')
+  const [jornada, setJornada] = useState(w.jornada || 'Tiempo completo')
 
   async function save() {
-    const ok = await onUpdate(w.id, name, pin)
+    const ok = await onUpdate(w.id, { name, pin, dni, jornada })
     if (ok) setEditing(false)
   }
-
-  function cancel() {
-    setName(w.name); setPin(w.pin); setEditing(false)
-  }
+  function cancel() { setName(w.name); setPin(w.pin); setDni(w.dni || ''); setJornada(w.jornada || 'Tiempo completo'); setEditing(false) }
 
   return (
-    <div className="worker-row" style={ editing ? { borderColor: 'var(--accent)', background: 'rgba(181,201,160,.04)' } : {} }>
+    <div className="worker-row" style={editing ? { borderColor: 'var(--accent)', background: 'rgba(181,201,160,.04)' } : {}}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
-          <div className="worker-name">
-            {w.name}
-            {isIn && <span className="badge"><span className="badge-dot" />En jornada</span>}
-          </div>
-          <div className="worker-pin">{editing ? `PIN visible: ${pin}` : 'PIN: ●●●●'}</div>
+          <div className="worker-name">{w.name}{isIn && <span className="badge"><span className="badge-dot" />En jornada</span>}</div>
+          <div className="worker-pin">PIN: {'●'.repeat(4)} {w.dni ? `· ${w.dni}` : <span style={{color:'var(--red)',fontSize:'.68rem'}}>⚠ Sin DNI</span>}</div>
+          <div className="worker-meta-tag">{w.jornada || 'Tiempo completo'}{w.firma_url ? ' · ✅ Firma OK' : ' · ⏳ Sin firma'}</div>
         </div>
         <div style={{ display: 'flex', gap: 6 }}>
           {!editing
-            ? <button className="btn-sm" style={{ background: 'none', border: '1px solid var(--border)', color: 'var(--muted)', fontSize: '.75rem', padding: '6px 12px' }} onClick={() => setEditing(true)}>✏️ Editar</button>
-            : <button className="btn-sm" style={{ background: 'none', border: '1px solid var(--border)', color: 'var(--muted)', fontSize: '.75rem', padding: '6px 12px' }} onClick={cancel}>✕ Cancelar</button>
+            ? <button className="btn-sm ghost" style={{ fontSize: '.75rem', padding: '6px 10px' }} onClick={() => setEditing(true)}>✏️</button>
+            : <button className="btn-sm ghost" style={{ fontSize: '.75rem', padding: '6px 10px' }} onClick={cancel}>✕</button>
           }
           <button className="btn-sm danger" style={{ fontSize: '.75rem', padding: '6px 10px' }} onClick={() => onRemove(w.id)}>🗑</button>
         </div>
       </div>
-
       {editing && (
-        <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <input
-              className="inp"
-              value={name}
-              onChange={e => setName(e.target.value)}
-              placeholder="Nombre"
-              style={{ background: 'var(--bg)' }}
-            />
-            <input
-              className="inp"
-              value={pin}
-              onChange={e => setPin(e.target.value)}
-              placeholder="PIN"
-              maxLength={4}
-              style={{ width: 80, flex: 'none', background: 'var(--bg)', fontFamily: 'monospace', letterSpacing: '.1em' }}
-            />
+        <div style={{ marginTop: 12, borderTop: '1px solid var(--border)', paddingTop: 12 }}>
+          <div className="edit-grid">
+            <div><div className="edit-label">Nombre</div><input className="inp" value={name} onChange={e => setName(e.target.value)} style={{ background: 'var(--bg)' }} /></div>
+            <div><div className="edit-label">DNI / NIE</div><input className="inp" value={dni} onChange={e => setDni(e.target.value)} placeholder="12345678A" style={{ background: 'var(--bg)' }} /></div>
+            <div><div className="edit-label">PIN (4 dígitos)</div><input className="inp" value={pin} onChange={e => setPin(e.target.value)} maxLength={4} style={{ background: 'var(--bg)', fontFamily: 'monospace' }} /></div>
+            <div><div className="edit-label">Tipo jornada</div>
+              <select className="inp" value={jornada} onChange={e => setJornada(e.target.value)} style={{ background: 'var(--bg)' }}>
+                <option>Tiempo completo</option>
+                <option>Tiempo parcial</option>
+              </select>
+            </div>
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
             <button className="btn-sm" onClick={save}>✓ Guardar</button>
-            <button className="btn-sm" style={{ background: 'none', border: '1px solid var(--border)', color: 'var(--muted)' }} onClick={cancel}>Cancelar</button>
+            <button className="btn-sm ghost" onClick={cancel}>Cancelar</button>
           </div>
-          <div style={{ fontSize: '.72rem', color: 'var(--muted)' }}>El PIN debe ser de 4 dígitos numéricos</div>
         </div>
       )}
     </div>
   )
 }
 
-// ─── ADMIN DOCS VIEW ──────────────────────────────────
-function AdminDocsView({ workers, showToast }) {
-  const [selectedWorker, setSelectedWorker] = useState('')
+// ─── DOCS VIEW ─────────────────────────────────────────
+function DocsView({ workerId, workerName, isAdmin, showToast }) {
+  const [docs, setDocs] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [uploading, setUploading] = useState(false)
+  const [selectedFile, setSelectedFile] = useState(null)
+  const [docName, setDocName] = useState('')
 
-  const worker = workers.find(w => w.id === selectedWorker)
+  useEffect(() => { fetchDocs() }, [workerId])
+
+  async function fetchDocs() {
+    setLoading(true)
+    const { data } = await supabase.from('documents').select('*').eq('worker_id', workerId).order('created_at', { ascending: false })
+    setDocs(data || []); setLoading(false)
+  }
+
+  async function upload() {
+    if (!selectedFile || !docName.trim()) return
+    setUploading(true)
+    const ext = selectedFile.name.split('.').pop()
+    const path = `${workerId}/${Date.now()}.${ext}`
+    const { error: upErr } = await supabase.storage.from('documents').upload(path, selectedFile)
+    if (upErr) { showToast && showToast('Error al subir el archivo', 'err'); setUploading(false); return }
+    const { data: { publicUrl } } = supabase.storage.from('documents').getPublicUrl(path)
+    await supabase.from('documents').insert({ worker_id: workerId, worker_name: workerName, name: docName.trim(), url: publicUrl, path, file_type: ext })
+    setDocName(''); setSelectedFile(null)
+    await fetchDocs(); setUploading(false)
+    showToast && showToast('Documento subido ✓')
+  }
+
+  async function deleteDoc(doc) {
+    if (!confirm(`¿Eliminar "${doc.name}"?`)) return
+    await supabase.storage.from('documents').remove([doc.path])
+    await supabase.from('documents').delete().eq('id', doc.id)
+    await fetchDocs(); showToast && showToast('Documento eliminado')
+  }
+
+  function fileIcon(ext) {
+    if (!ext) return '📄'
+    if (ext === 'pdf') return '📕'
+    if (['jpg','jpeg','png','gif','webp'].includes(ext)) return '🖼️'
+    if (['doc','docx'].includes(ext)) return '📝'
+    return '📄'
+  }
+
+  if (loading) return <div className="loading"><div className="spinner" /> Cargando...</div>
 
   return (
     <div>
-      <div style={{marginBottom:20}}>
-        <div className="card-title" style={{marginBottom:10}}>Selecciona un trabajador</div>
-        <select className="sel" value={selectedWorker} onChange={e => setSelectedWorker(e.target.value)} style={{minWidth:220}}>
+      {!isAdmin && <div style={{ marginBottom: 20 }}>
+        <div style={{ fontFamily: "'Playfair Display',serif", fontSize: '1.1rem', fontWeight: 700, color: 'var(--white)', marginBottom: 4 }}>Mis documentos</div>
+        <div style={{ color: 'var(--muted)', fontSize: '.82rem' }}>Documentos compartidos por la empresa</div>
+      </div>}
+      {isAdmin && (
+        <div style={{ marginBottom: 16 }}>
+          <div className="card-title">Subir documento para {workerName}</div>
+          <div className="doc-upload-row">
+            <input className="inp" placeholder="Nombre (ej. Nómina junio 2025)" value={docName} onChange={e => setDocName(e.target.value)} />
+            <label className="file-input-label">
+              📎 {selectedFile ? selectedFile.name.slice(0, 18) + '...' : 'Elegir archivo'}
+              <input type="file" style={{ display: 'none' }} accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xls,.xlsx" onChange={e => setSelectedFile(e.target.files[0])} />
+            </label>
+            <button className="btn-sm" onClick={upload} disabled={uploading || !selectedFile || !docName.trim()}>{uploading ? 'Subiendo...' : 'Subir'}</button>
+          </div>
+        </div>
+      )}
+      {docs.length === 0
+        ? <div className="empty" style={{ padding: 32 }}>Sin documentos todavía</div>
+        : <div className="doc-list">
+          {docs.map(doc => (
+            <div className="doc-row" key={doc.id}>
+              <div className="doc-info">
+                <span className="doc-icon">{fileIcon(doc.file_type)}</span>
+                <div>
+                  <div className="doc-name">{doc.name}</div>
+                  <div className="doc-date">{new Date(doc.created_at).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <a className="btn-download" href={doc.url} target="_blank" rel="noreferrer" download>⬇ Descargar</a>
+                {isAdmin && <button className="btn-sm danger" onClick={() => deleteDoc(doc)} style={{ padding: '8px 10px' }}>✕</button>}
+              </div>
+            </div>
+          ))}
+        </div>
+      }
+    </div>
+  )
+}
+
+// ─── ADMIN DOCS VIEW ───────────────────────────────────
+function AdminDocsView({ workers, showToast }) {
+  const [selectedWorker, setSelectedWorker] = useState('')
+  const worker = workers.find(w => w.id === selectedWorker)
+  return (
+    <div>
+      <div style={{ marginBottom: 20 }}>
+        <div className="card-title" style={{ marginBottom: 10 }}>Selecciona un trabajador</div>
+        <select className="sel" value={selectedWorker} onChange={e => setSelectedWorker(e.target.value)} style={{ minWidth: 220 }}>
           <option value="">— Selecciona trabajador —</option>
           {workers.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
         </select>
       </div>
-      {worker && (
-        <div className="card">
-          <DocsView workerId={worker.id} workerName={worker.name} isAdmin={true} showToast={showToast} />
-        </div>
-      )}
+      {worker && <div className="card"><DocsView workerId={worker.id} workerName={worker.name} isAdmin={true} showToast={showToast} /></div>}
     </div>
   )
 }
@@ -795,14 +829,12 @@ function AdminPinModal({ onSuccess, onClose }) {
 
   function press(d) {
     if (buf.length >= 4) return
-    const next = buf + d
-    setBuf(next); setErr('')
+    const next = buf + d; setBuf(next); setErr('')
     if (next.length === 4) {
       if (next === ADMIN_PIN) { onSuccess() }
       else { setErr('PIN incorrecto'); setTimeout(() => setBuf(''), 600) }
     }
   }
-
   function del() { setBuf(b => b.slice(0, -1)); setErr('') }
 
   return (
@@ -814,9 +846,7 @@ function AdminPinModal({ onSuccess, onClose }) {
           {[0,1,2,3].map(i => <div key={i} className={`pin-dot ${i < buf.length ? 'filled' : ''}`} />)}
         </div>
         <div className="pin-pad">
-          {['1','2','3','4','5','6','7','8','9'].map(d => (
-            <button key={d} className="pin-btn" onClick={() => press(d)}>{d}</button>
-          ))}
+          {['1','2','3','4','5','6','7','8','9'].map(d => <button key={d} className="pin-btn" onClick={() => press(d)}>{d}</button>)}
           <button className="pin-btn del" onClick={del}>⌫</button>
           <button className="pin-btn" onClick={() => press('0')}>0</button>
           <button className="pin-btn ok" onClick={() => { if (buf === ADMIN_PIN) onSuccess(); else setErr('PIN incorrecto') }}>✓</button>
