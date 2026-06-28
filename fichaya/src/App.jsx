@@ -336,10 +336,19 @@ function PinView({ workers, records, reload, showToast }) {
         </div>
         {worker.firma_url && <div className="firma-badge-info">✅ Firma registrada — se aplica automáticamente</div>}
         <div className="menu-btns">
-          <button className="menu-btn" onClick={() => setScreen('fichar')}>
-            <span className="menu-icon">🟢</span>
-            <span className="menu-label"><span className="menu-lbl-main">Fichar entrada</span><span className="menu-lbl-sub">Registrar inicio de jornada</span></span>
-          </button>
+          {open
+            ? <div style={{background:'rgba(212,168,90,.1)',border:'1px solid rgba(212,168,90,.3)',borderRadius:12,padding:'18px 24px',display:'flex',alignItems:'center',gap:14}}>
+                <span style={{fontSize:'1.4rem'}}>⏳</span>
+                <div>
+                  <div style={{fontSize:'.95rem',fontWeight:600,color:'var(--amber)'}}>Ya estás fichado</div>
+                  <div style={{fontSize:'.75rem',color:'var(--muted)',marginTop:2}}>Entrada registrada a las {new Date(open.check_in).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}</div>
+                </div>
+              </div>
+            : <button className="menu-btn" onClick={() => setScreen('fichar')}>
+                <span className="menu-icon">🟢</span>
+                <span className="menu-label"><span className="menu-lbl-main">Fichar entrada</span><span className="menu-lbl-sub">Registrar inicio de jornada</span></span>
+              </button>
+          }
           <button className="menu-btn" onClick={() => setScreen('docs')}>
             <span className="menu-icon">📄</span>
             <span className="menu-label"><span className="menu-lbl-main">Mis documentos</span><span className="menu-lbl-sub">Contratos, nóminas y más</span></span>
@@ -563,9 +572,10 @@ function AdminView({ workers, records, reload, showToast }) {
   const active = records.filter(r => !r.check_out)
 
   async function addWorker() {
-    if (!name.trim() || !/^\d{4}$/.test(pin)) { showToast('Nombre y PIN de 4 dígitos requeridos', 'err'); return }
+    const cleanPin = pin.trim()
+    if (!name.trim() || cleanPin.length !== 4 || !/^\d{4}$/.test(cleanPin)) { showToast('Nombre y PIN de 4 dígitos requeridos', 'err'); return }
     if (workers.some(w => w.pin === pin)) { showToast('Ese PIN ya está en uso', 'err'); return }
-    await supabase.from('workers').insert({ name: name.trim(), pin, dni: dni.trim(), jornada })
+    await supabase.from('workers').insert({ name: name.trim(), pin: cleanPin, dni: dni.trim(), jornada })
     setName(''); setPin(''); setDni(''); setJornada('Tiempo completo')
     await reload(); showToast('Trabajador añadido ✓')
   }
@@ -621,7 +631,7 @@ function AdminView({ workers, records, reload, showToast }) {
               <input className="inp" placeholder="DNI/NIE" value={dni} onChange={e => setDni(e.target.value)} style={{ maxWidth: 130, flex: 'none' }} />
             </div>
             <div className="input-row">
-              <input className="inp" placeholder="PIN (4 dígitos)" maxLength={4} type="password" value={pin} onChange={e => setPin(e.target.value)} style={{ maxWidth: 120, flex: 'none' }} />
+              <input className="inp" placeholder="PIN (4 dígitos)" maxLength={4} type="password" inputMode="numeric" pattern="[0-9]*" value={pin} onChange={e => setPin(e.target.value.replace(/\D/g, ''))} style={{ maxWidth: 120, flex: 'none' }} />
               <select className="inp" value={jornada} onChange={e => setJornada(e.target.value)}>
                 <option>Tiempo completo</option>
                 <option>Tiempo parcial</option>
