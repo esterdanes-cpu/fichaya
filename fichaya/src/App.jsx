@@ -600,7 +600,8 @@ function AdminView({ workers, records, reload, showToast }) {
   const active = records.filter(r => !r.check_out)
   const todayStr = new Date().toISOString().slice(0, 10)
   const workersCheckedInToday = new Set(records.filter(r => r.check_in.slice(0, 10) === todayStr).map(r => r.worker_id))
-  const pendingCount = workers.filter(w => !workersCheckedInToday.has(w.id)).length
+  const pendingWorkers = workers.filter(w => !workersCheckedInToday.has(w.id))
+  const pendingCount = pendingWorkers.length
 
   async function addWorker() {
     const cleanPin = pin.trim()
@@ -650,7 +651,21 @@ function AdminView({ workers, records, reload, showToast }) {
 
       {adminTab === 'dashboard' && <div>
         <div className="stat-grid">
-          <div className="stat"><div className="stat-val">{pendingCount}</div><div className="stat-lbl">Sin fichar hoy</div></div>
+          <div className="stat" style={{gridColumn: '1 / -1'}}>
+            <div style={{display:'flex', alignItems:'baseline', gap:10, marginBottom: pendingWorkers.length ? 10 : 0}}>
+              <div className="stat-val">{pendingCount}</div>
+              <div className="stat-lbl">Sin fichar hoy</div>
+            </div>
+            {pendingWorkers.length > 0 && (
+              <div style={{display:'flex', flexWrap:'wrap', gap:6}}>
+                {pendingWorkers.map(w => (
+                  <span key={w.id} style={{background:'rgba(212,168,90,.12)', color:'var(--amber)', fontSize:'.75rem', fontWeight:600, padding:'3px 10px', borderRadius:20, border:'1px solid rgba(212,168,90,.25)'}}>
+                    {w.name}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
           <div className="stat"><div className="stat-val">{active.length}</div><div className="stat-lbl">En jornada ahora</div></div>
           <div className="stat"><div className="stat-val">{workers.length}</div><div className="stat-lbl">Trabajadores</div></div>
         </div>
@@ -729,7 +744,6 @@ function WorkerRow({ w, isIn, onRemove, onUpdate }) {
             ? <button className="btn-sm ghost" style={{ fontSize: '.75rem', padding: '6px 10px' }} onClick={() => setEditing(true)}>✏️</button>
             : <button className="btn-sm ghost" style={{ fontSize: '.75rem', padding: '6px 10px' }} onClick={cancel}>✕</button>
           }
-          <button className="btn-sm danger" style={{ fontSize: '.75rem', padding: '6px 10px' }} onClick={() => onRemove(w.id)}>🗑</button>
         </div>
       </div>
       {editing && (
@@ -745,9 +759,10 @@ function WorkerRow({ w, isIn, onRemove, onUpdate }) {
               </select>
             </div>
           </div>
-          <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+          <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap:'wrap' }}>
             <button className="btn-sm" onClick={save}>✓ Guardar</button>
             <button className="btn-sm ghost" onClick={cancel}>Cancelar</button>
+            <button className="btn-sm danger" style={{marginLeft:'auto'}} onClick={() => onRemove(w.id)}>🗑 Eliminar trabajador</button>
           </div>
         </div>
       )}
