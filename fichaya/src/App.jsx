@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import * as XLSX from 'xlsx'
 import { supabase } from './lib/supabase'
 
 const ADMIN_PIN = import.meta.env.VITE_ADMIN_PIN || '1234'
@@ -484,7 +483,17 @@ function HistoryView({ workers, records }) {
   if (filterWorker) recs = recs.filter(r => r.worker_id === filterWorker)
   if (filterMonth) recs = recs.filter(r => r.check_in.startsWith(filterMonth))
 
-  function exportXLSX() {
+  async function exportXLSX() {
+    // Load SheetJS dynamically from CDN
+    if (!window.XLSX) {
+      await new Promise((resolve, reject) => {
+        const s = document.createElement('script')
+        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'
+        s.onload = resolve; s.onerror = reject
+        document.head.appendChild(s)
+      })
+    }
+    const XLSX = window.XLSX
     const wb = XLSX.utils.book_new()
 
     // Header rows with company info
@@ -589,6 +598,9 @@ function AdminView({ workers, records, reload, showToast }) {
   const [jornada, setJornada] = useState('Tiempo completo')
   const [adminTab, setAdminTab] = useState('dashboard')
   const active = records.filter(r => !r.check_out)
+  const todayStr = new Date().toISOString().slice(0, 10)
+  const workersCheckedInToday = new Set(records.filter(r => r.check_in.slice(0, 10) === todayStr).map(r => r.worker_id))
+  const pendingCount = workers.filter(w => !workersCheckedInToday.has(w.id)).length
 
   async function addWorker() {
     const cleanPin = pin.trim()
@@ -638,7 +650,7 @@ function AdminView({ workers, records, reload, showToast }) {
 
       {adminTab === 'dashboard' && <div>
         <div className="stat-grid">
-          <div className="stat"><div className="stat-val">{records.length}</div><div className="stat-lbl">Registros totales</div></div>
+          <div className="stat"><div className="stat-val">{pendingCount}</div><div className="stat-lbl">Sin fichar hoy</div></div>
           <div className="stat"><div className="stat-val">{active.length}</div><div className="stat-lbl">En jornada ahora</div></div>
           <div className="stat"><div className="stat-val">{workers.length}</div><div className="stat-lbl">Trabajadores</div></div>
         </div>
